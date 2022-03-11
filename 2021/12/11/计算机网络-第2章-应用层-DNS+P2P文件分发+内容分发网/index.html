@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ch">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="yeung">
+
+
+
+
+
+
+
+<title>计算机网络-第2章-应用层-DNS+P2P文件分发+内容分发网 | YE&#39;s BLOG</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+
+
+
+  <meta name="generator" content="Hexo 5.4.1"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">Ultralight Beam.</a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archives</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/about/">About</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/tag/">Tags</a>
+              </li> 
+                   
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/">
+                            计算机网络
+                        </a>
+                    </span>    
+                
+                    <span class="post-tag">
+                        <a href="/tags/%E5%BA%94%E7%94%A8%E5%B1%82/">
+                            应用层
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                计算机网络-第2章-应用层-DNS+P2P文件分发+内容分发网
+            
+            
+        </div>
+        <span class="post-date">
+            12 11, 2021
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h1 id="计算机网络-第2章-应用层"><a href="#计算机网络-第2章-应用层" class="headerlink" title="计算机网络-第2章 应用层"></a>计算机网络-第2章 应用层</h1><h2 id="2-4-DNS：因特网的目录服务"><a href="#2-4-DNS：因特网的目录服务" class="headerlink" title="2.4 DNS：因特网的目录服务"></a>2.4 DNS：因特网的目录服务</h2><h3 id="2-4-1-DNS提供的服务"><a href="#2-4-1-DNS提供的服务" class="headerlink" title="2.4.1 DNS提供的服务"></a>2.4.1 DNS提供的服务</h3><p>DNS（Domain Name System）域名系统的主要任务：进行主机名到IP地址转换的目录服务。</p>
+<p>DNS是：1.一个由分层的DNS服务器实现的分布式数据库。2.一个使得主机能够查询分布式数据库的应用层协议。</p>
+<p>DNS协议运行在UDP之上，使用53号端口。</p>
+<p>DNS通常由其他应用层协议所使用，包括HTTP、SMTP和FTP，将用户提供的主机名解析为IP地址。</p>
+<p>举一个例子，运行在某用户主机上的浏览器请求URL <a target="_blank" rel="noopener" href="http://www.someschool.edu/index.html">www.someschool.edu/index.html</a> 时：</p>
+<ol>
+<li>同一台用户主机上运行着DNS应用的客户端</li>
+<li>浏览器从上述URL中抽取出主机名 <a target="_blank" rel="noopener" href="http://www.somechool.edu/">www.somechool.edu</a> ，并将主机名传给DNS应用的客户端</li>
+<li>DNS客户向DNS服务器发送一个包含主机名的请求</li>
+<li>DNS客户最终会收到一份回答报文，包含对应该主机名的IP地址</li>
+<li>浏览器接收到来自DNS的该IP地址，并向位于该IP地址80端口的HTTP服务器进程发起TCP连接</li>
+</ol>
+<p>除了进行主机名到IP地址的转换之外，DNS还提供一些重要服务：</p>
+<ul>
+<li>主机别名</li>
+<li>邮件服务器别名</li>
+<li>负载分配：繁忙的站点被冗余分布在多台服务器上，每个有着不同的IP地址。一个IP地址集合因此与同一个规范主机名相联系。客户发出DNS请求时，服务器用IP地址的整个集合进行响应，但在每个回答中循环这些地址次序。实现负载分配。</li>
+</ul>
+<h3 id="2-4-2-DNS工作机理概述"><a href="#2-4-2-DNS工作机理概述" class="headerlink" title="2.4.2 DNS工作机理概述"></a>2.4.2 DNS工作机理概述</h3><p>DNS的一种简单设计是在因特网上只使用一个DNS服务器，该服务器包含所有映射。但这种集中式设计有如下问题：</p>
+<ul>
+<li>单点故障：如果该服务器崩溃，整个因特网随之瘫痪</li>
+<li>通信容量：单个服务器需要处理所有DNS查询</li>
+<li>远距离的集中式数据库：单个服务器不可能邻近所有客户</li>
+<li>维护</li>
+</ul>
+<p>因此，DNS采用<strong>分布式</strong>的设计方案</p>
+<h4 id="2-4-2-1-分布式、层次数据库"><a href="#2-4-2-1-分布式、层次数据库" class="headerlink" title="2.4.2.1 分布式、层次数据库"></a>2.4.2.1 分布式、层次数据库</h4><p>DNS使用大量的DNS服务器，它们以层次方式组织，分布在全世界范围内。</p>
+<p>大致来说，有3种类型的DNS服务器：<strong>根DNS服务器</strong>、顶级域（Top-Level Domain / TLD）DNS服务器（com、edu、org、cn、uk、jp）和<strong>权威DNS服务器</strong>。</p>
+<p>还有一类重要的DNS服务器：本地DNS服务器（local DNS Server）。每个ISP都有一台本地DNS服务器。</p>
+<p>当<strong>主机发出DNS请求</strong>时，该请求<strong>被发往本地DNS服务器</strong>，它起着代理的作用，并将该请求<strong>转发到DNS服务器层次结构中</strong>。</p>
+<p>例子：假设主机cse.nyu.edu想知道主机gaia.cs.umass.edu的IP地址</p>
+<p><img src="image.jpg" alt="image"></p>
+<p>在这个例子中，假设了TLD服务器知道用于主机的权威DNS服务器的IP地址，一般而言这种假设并不总是正确的，TLD服务器只是知道中间的某个DNS服务器，该中间DNS服务器依次才能知道用于该主机的权威DNS服务器。</p>
+<p>这个例子利用了<strong>递归查询</strong>和<strong>迭代查询</strong>，从cse.nyu.edu到dns.nyu.edu发出的查询是递归查询，因为该查询以自己的名义请求dns.nyu.edu来获得该映射。而后继的3个查询是迭代查询，因为所有的回答都是直接返回给dns.nyu.edu。</p>
+<p>实践中，查询通常是：<strong>从请求主机到本地DNS服务器的查询是递归的，其余的查询是迭代的。</strong></p>
+<h4 id="2-4-2-2-DNS缓存"><a href="#2-4-2-2-DNS缓存" class="headerlink" title="2.4.2.2 DNS缓存"></a>2.4.2.2 DNS缓存</h4><p>DNS缓存能改善时延性能并减少在因特网上到处传输的DNS报文数量。</p>
+<p>原理：在一个请求链中，当某DNS服务器接收一个DNS回答时，它能将映射缓存在本地存储器中。</p>
+<p>由于主机和主机名与IP地址间的映射并不是永久的，DNS服务器在一段时间后（通常是两天）将丢弃缓存的信息。</p>
+<h3 id="2-4-3-DNS记录和报文"><a href="#2-4-3-DNS记录和报文" class="headerlink" title="2.4.3 DNS记录和报文"></a>2.4.3 DNS记录和报文</h3><p>共同实现DNS分布式数据库的所有DNS服务器存储了<strong>资源记录</strong>（Resource Record / RR），<strong>RR提供了主机名到IP地址的映射</strong>。每个DNS回答报文包含了一条或多条RR。</p>
+<p>RR是一个包含了下列字段的4元组：(Name, Value, Type, TTL)</p>
+<ul>
+<li>TTL是该记录的生存时间，决定了RR应当从缓存中删除的时间</li>
+<li><strong>Name和Value的值取决于Type</strong></li>
+</ul>
+<ol>
+<li>如果Type = A。Name是主机名，Value是该主机名对应的IP地址：(relay1.bar.foo.com,145.37.93.126,A)</li>
+<li>如果Type = NS。Name是个域，Value是个知道如何获得该域中主机IP地址的权威DNS服务器的主机名：(foo.com,dns.foo.com,NS)</li>
+<li>如果Type = CNAME。Name是主机别名，Value是这个主机对应的规范主机名：(foo.com,relay1.bar.foo.com,CNAME)</li>
+<li>如果Type = MX。Name是邮件服务器的别名，Value是它对应的规范主机名：(foo.com,mail.bar.foo.com,MX)</li>
+</ol>
+<p>如果一台DNS服务器<strong>是用于某特定主机名的权威DNS服务器</strong>，那么该DNS服务器会有一条包含用于该主机名的类型A记录。</p>
+<p>如果服务器<strong>不是</strong>用于某主机名的权威DNS服务器，那么该服务器将包含一条类型NS记录，该记录对应于包含主机名的域，还包括一条类型A记录，提供了在NS记录的Value字段中的DNS服务器的IP地址。</p>
+<h4 id="2-4-3-1-DNS报文"><a href="#2-4-3-1-DNS报文" class="headerlink" title="2.4.3.1 DNS报文"></a>2.4.3.1 DNS报文</h4><p>DNS报文只有DNS查询和回答报文，且它们有相同的格式。</p>
+<p><img src="image1.jpg" alt="image1"></p>
+<ul>
+<li>前12个字节是首部区域。第一个字段是标识符，是一个16比特的数，用于标识该查询，这个标识符会被复制到对查询的回答报文中，以便让客户用它来匹配发送的请求和接收到的回答。第二个字段标志中含有若干标志，1比特的“查询/回答”标志位指出报文是查询报文（0）还是回答报文（1）。还可以标志服务器是权威DNS服务器、客户希望执行递归查询时设置“希望递归”标志位。</li>
+<li>问题区域包含着正在进行的查询信息。包括：1.名字字段，包含正在被查询的主机名字。2.类型字段，指出有关改名字的正被询问的问题类型（类型A或类型MX…）。</li>
+<li>回答区域包含了对最初请求的名字的RR。可以包含多条RR，因此一个主机名能够有多个IP地址。</li>
+<li>权威区域包含了其他权威服务器的记录。</li>
+<li>附加区域包含了其他有帮助的记录。</li>
+</ul>
+<h4 id="2-4-3-2-在DNS数据库中插入记录"><a href="#2-4-3-2-在DNS数据库中插入记录" class="headerlink" title="2.4.3.2 在DNS数据库中插入记录"></a>2.4.3.2 在DNS数据库中插入记录</h4><p>要向注册登记机构注册域名时，需要向机构提供基本和辅助权威DNS服务器的名字和IP地址。对这两个权威DNS服务器，机构确保将一个类型NS和一个类型A的记录输入到TLD com服务器。</p>
+<hr>
+<h2 id="2-5-P2P文件分发"><a href="#2-5-P2P文件分发" class="headerlink" title="2.5 P2P文件分发"></a>2.5 P2P文件分发</h2><h3 id="2-5-1-P2P体系结构的扩展性"><a href="#2-5-1-P2P体系结构的扩展性" class="headerlink" title="2.5.1 P2P体系结构的扩展性"></a>2.5.1 P2P体系结构的扩展性</h3><p>例子：将一个文件分发给一个固定对等方集合。</p>
+<p><img src="image2.jpg" alt="image2"></p>
+<p>us表示服务器接入链路的上载速率，ui表示第i对等方接入链路的上载速率，di表示第i对等方接入链路的下载速率，F表示被分发的文件长度（以比特计），N表示要获得该文件副本的对等方的数量。</p>
+<p>分发时间（distribution time）是所有N个对等方的到该文件的副本所需要的时间。</p>
+<p>先来考虑对<strong>C-S体系结构</strong>的分发时间，表示为Dcs：</p>
+<ul>
+<li>服务器必须向N个对等方传输一个副本，因此服务器必须传输NF比特，因为服务器的上载速率是us，因此分发该文件的时间必定是至少为<strong>NF/us</strong>。</li>
+<li>令dmin表示具有最小下载速率的对等方的下载速率，即dmin=min{d1,d2,…,dN}。具有最小下载速率的对等方不可能在少于F/dmin秒时间内获得所有比特。因此最小分发时间至少为<strong>F/dmin</strong>。</li>
+<li>结合两式，得到：Dcs &gt;= max{NF/us, F/dmin}。取这个下界作为实际发送时间，即<strong>Dcs = max{NF/us, F/dmin}。</strong></li>
+</ul>
+<p>对足够大的N，C-S分发时间由NF/us确定。所以该分发时间<strong>随着对等方N的数量线性地增加</strong>。</p>
+<p>下面对<strong>P2P体系结构</strong>进行分析：</p>
+<ul>
+<li>在分发的开始，只有服务器具有文件。为了使对等方得到该文件，服务器必须经接入链路至少<strong>发送该文件的每个比特一次</strong>。因此，最小分发时间至少是<strong>F/us</strong>。</li>
+<li>与C-S结构一样，具有最低下载速率的对等方不能以小于F/dmin秒的分发时间获得所有F比特。因此最小分发时间至少为<strong>F/dmin</strong>。</li>
+<li>系统整体的总上载能力等于服务器的上载速率加上每个单独的对等方的上载速率，即utotal=us+u1+…+uN。系统必须向N个对等方交付F比特，因此总共交付NF比特，这不能以快于utotal的速率完成。因此最小分发时间至少是<strong>NF/(us+u1+…+uN)。</strong></li>
+<li>因此，P2P的最小分发时间DP2P &gt;= max{F/us, F/dmin, NF/utotal} 。取下界为最小分发时间，<strong>DP2P = max{F/us, F/dmin, NF/utotal}。</strong></li>
+</ul>
+<p><img src="image3.jpg" alt="image3"></p>
+<p>在上图中，F/u=1小时，us=10u，dmin&gt;=us。因此，在一个小时中，一个对等方能够传输整个文件，服务器的传输速率使对等方上载速率的10倍。</p>
+<p>对于C-S结构，随着对等方数量的增加，分发时间<strong>呈线性增长且没有界</strong>。</p>
+<p>对于P2P，最小分发时间不仅<strong>总是小于</strong>C-S的分发时间，并且对于任意的对等方数量N，<strong>分发时间总是小于1小时</strong>。</p>
+<h3 id="2-5-2-BitTorrent"><a href="#2-5-2-BitTorrent" class="headerlink" title="2.5.2 BitTorrent"></a>2.5.2 BitTorrent</h3><p>BitTorrent是一种用于文件分发的流行P2P协议。用BitTorrent的术语来讲，参与一个特定文件分发的<strong>所有对等方的集合</strong>被称为一个<strong>洪流</strong>(torrent)。在一个洪流中的对等方彼此下载等长度的文件块(chunk)，典型的块长度为256KB。</p>
+<p>一个对等方首次加入一个洪流时，它没有块，随着时间的流逝，它累积了越来越多的块，它下载块时也为其他对等方上载了块。一旦某对等方获得了整个文件，它可能离开洪流，也可能继续留在洪流中为其他对等方上载块。</p>
+<p>每个洪流具有一个基础设施节点，称为追踪器(tracker)。当一个对等方加入某洪流时，它向追踪器注册自己，并周期性地通知追踪器它仍在该洪流中。</p>
+<hr>
+<h2 id="2-6-视频流和内容分发网"><a href="#2-6-视频流和内容分发网" class="headerlink" title="2.6 视频流和内容分发网"></a>2.6 视频流和内容分发网</h2><h4 id="2-6-1-HTTP流和DASH"><a href="#2-6-1-HTTP流和DASH" class="headerlink" title="2.6.1 HTTP流和DASH"></a>2.6.1 HTTP流和DASH</h4><p>在HTTP流中，视频只是存储在HTTP服务器中作为一个普通的文件，每个文件有一个特定的URL。客户看视频时，客户与服务器创建一个TCP连接并发送该URL的HTTP GET请求。服务器以尽可能快的速率，在一个HTTP响应报文中发送该视频文件。在客户一侧，字节被收集在客户应用缓存中。一旦该缓存中的字节数量超过预先设定的门槛，应用程序就开始播放。</p>
+<p>尽管HTTP流已得到广泛部署，但有一个缺陷，即所有客户接收到相同编码的视频，尽管对不同的客户而言，客户可用的带宽大小有很大不同。因此出现了<strong>经HTTP的动态适应性流</strong>（Dynamic Adaption Streaming over HTTP / DASH）。在DASH中，视频编码为几个不同的版本，每个版本具有不同的比特率，对应不同的质量水平。DASH允许客户使用不同的以太网接入速率流式播放具有不同编码速率的视频。</p>
+<p>使用DASH之后，每个视频版本存储在HTTP服务器中，每个版本都有一个不同的URL。HTTP服务器也有一个告示文件（manifest file），为每个版本提供了一个URL及其比特率。客户首先请求该告示文件并得知各种各样的版本，然后在HTTP GET请求报文中对每块指定一个URL和一个字节范围，一次选择一块。在下载块的同时，测量接收带宽，并运行一个速率决定算法来选择下次请求的块。</p>
+<h4 id="2-6-2-内容分发网CDN"><a href="#2-6-2-内容分发网CDN" class="headerlink" title="2.6.2 内容分发网CDN"></a>2.6.2 内容分发网CDN</h4><p>为了应对向分布于全世界的用户分发巨量视频数据，几乎所有主要的视频流公司都利用<strong>内容分发网</strong>（Content Distribution Network, CDN）。CDN管理分布在多个地理位置上的服务器，在它的服务器中存储视频的副本。</p>
+<p>CDN可以是<strong>专用CDN</strong>，即它由内容提供商自己所拥有。也可以是<strong>第三方CDN</strong>，它代表多个内容提供商分发内容。</p>
+<p>CDN通常采用两种不同的服务器安置原则：</p>
+<ul>
+<li><strong>深入。</strong>通过在遍及全球的接入ISP中部署服务器集群来深入到ISP的接入网中。目标是靠近端用户，通过减少端用户和CDN集群之间链路和路由器的数量，改善用户感受到的时延和吞吐量。</li>
+<li><strong>邀请做客。</strong>通过在少量关键位置建造大集群来邀请到ISP做客。CDN通常将它们的集群放置在因特网交换点（IXP）。与深入设计原则相比，邀请做客设计通常产生较低的维护和管理开销，但以较高的时延和较低的吞吐量为代价。</li>
+</ul>
+<p>一旦CDN的集群准备就绪，它就可以跨集群复制内容。许多CDN没有将视频推入它们的集群，而是使用一种简单的拉策略：如果客户向一个未存储该视频的集群请求某视频，则该集群检索该视频，向客户流式传输视频时在本地存储一个副本。当集群存储器变满时，删除不经常请求的视频。</p>
+<h4 id="2-6-2-1-CDN操作"><a href="#2-6-2-1-CDN操作" class="headerlink" title="2.6.2.1 CDN操作"></a>2.6.2.1 CDN操作</h4><p>当用户主机中的一个浏览器指令检索一个特定的视频时，CDN必须截获该请求，以便能够：1.<strong>确定</strong>此时适合用于该客户的<strong>CDN服务器集群</strong>。2.将客户的请求<strong>重定向</strong>到该集群的某台<strong>服务器</strong>。</p>
+<p>大多数CDN利用DNS来截获和重定向请求。</p>
+<p>例子：假定一个内容提供商NetCinema雇佣第三方CDN公司KingCDN来向客户分发视频。</p>
+<ol>
+<li>用户访问位于NetCinema的Web网页</li>
+<li>当用户点击链接 <a target="_blank" rel="noopener" href="http://video.netcinema.com/6Y7B23V">http://video.netcinema.com/6Y7B23V</a> 时，该用户主机发送了一个对于 video.netcinema.com 的DNS请求</li>
+<li>用户的<strong>LDNS服务器</strong>将该DNS请求<strong>中继</strong>到一台用于<strong>NetCinema的权威DNS服务器</strong>，该服务器<strong>观察到“video”字符串</strong>，权威DNS服务器向LDNS<strong>返回一个KingCDN域的主机名</strong>，为了将DNS请求移交给KingCDN，如a1105.kingcdn.com</li>
+<li>DNS请求进入了KingCDN专用DNS基础设施。用户的LDNS发送第二个请求，是对a1105.kingcdn.com的DNS请求，KingCDN的DNS系统最终向LDNS返回<strong>KingCDN内容服务器的IP地址</strong></li>
+<li>LDNS向<strong>用户主机</strong>转发<strong>内容服务CDN节点的IP地址</strong></li>
+<li>一旦客户收到KingCDN内容服务器的IP地址，它与具有该IP地址的服务器创建一条直接的TCP连接，并发出对该视频的HTTP GET请求</li>
+</ol>
+<h4 id="2-6-2-2-集群选择策略"><a href="#2-6-2-2-集群选择策略" class="headerlink" title="2.6.2.2 集群选择策略"></a>2.6.2.2 集群选择策略</h4><p>任何CDN部署，其核心是集群选择策略，即动态地将客户定向到CDN中的某个服务器集群或数据中心的机制。</p>
+<p>一种简单的策略是指派客户到地理上最为邻近的集群。使用商用地理位置数据库，每个LDNS IP地址都映射到一个地理位置。这种简单的策略忽略了时延和可用带宽随因特网路径时间而变化。</p>
+<p>为了基于当前流量条件为客户决定最好的集群，CDN能够对其集群和客户之间的时延和丢包性能执行周期性的实时测量。例如，CDN能够让它的每个集群周期性地向位于全世界地所有LDNS发送探测分组。这种方法的一个缺点是许多LDNS被配置为不会响应这些探测。</p>
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+                <div class="icon arrow-left"></div>
+                <div class="post-link">
+                    <a href="/2021/12/31/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%AC%AC3%E7%AB%A0-%E8%BF%90%E8%BE%93%E5%B1%82-%E6%A6%82%E8%BF%B0-%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E4%B8%8E%E5%88%86%E8%A7%A3/">Prev</a>
+                </div>
+            
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2021/12/06/SpringBoot2-%E9%AB%98%E7%BA%A7%E7%89%B9%E6%80%A7/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+                Ye Yang | 
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://hexo.io/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+  </body>
+</html>

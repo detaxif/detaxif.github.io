@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ch">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="yeung">
+
+
+
+
+
+
+
+<title>SpringBoot2-指标监控 | YE&#39;s BLOG</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+
+
+
+  <meta name="generator" content="Hexo 5.4.1"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">Ultralight Beam.</a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archives</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/about/">About</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/tag/">Tags</a>
+              </li> 
+                   
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/SpringBoot/">
+                            SpringBoot
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                SpringBoot2-指标监控
+            
+            
+        </div>
+        <span class="post-date">
+            12 06, 2021
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h1 id="SpringBoot-指标监控"><a href="#SpringBoot-指标监控" class="headerlink" title="SpringBoot 指标监控"></a>SpringBoot 指标监控</h1><h2 id="1-SpringBoot-Actuator"><a href="#1-SpringBoot-Actuator" class="headerlink" title="1. SpringBoot Actuator"></a>1. SpringBoot Actuator</h2><p>未来每一个微服务在云上部署以后，我们都需要对其进行监控、追踪、审计、控制等。SpringBoot就抽取了Actuator场景，使得我们每个微服务快速引用即可获得生产级别的应用监控、审计等功能。</p>
+<h3 id="1-1-引入依赖"><a href="#1-1-引入依赖" class="headerlink" title="1.1 引入依赖"></a>1.1 引入依赖</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-actuator<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-如何使用"><a href="#1-2-如何使用" class="headerlink" title="1.2 如何使用"></a>1.2 如何使用</h3><ul>
+<li>引入场景</li>
+<li>暴露所有监控信息为HTTP</li>
+</ul>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#management 是所有actuator的配置</span></span><br><span class="line"><span class="comment">#management.endpoint.端点名.xxx 是对某个端点的具体配置</span></span><br><span class="line"><span class="attr">management:</span></span><br><span class="line">  <span class="attr">endpoints:</span></span><br><span class="line">    <span class="attr">enabled-by-default:</span> <span class="literal">true</span> <span class="comment">#暴露所有端点信息</span></span><br><span class="line">    <span class="attr">web:</span></span><br><span class="line">      <span class="attr">exposure:</span></span><br><span class="line">        <span class="attr">include:</span> <span class="string">&#x27;*&#x27;</span>  <span class="comment">#以web方式暴露</span></span><br><span class="line">  <span class="attr">endpoint:</span></span><br><span class="line">  	<span class="attr">health:</span></span><br><span class="line">  	  <span class="attr">show-details:</span> <span class="string">always</span> <span class="comment">#开启health端点显示详细信息</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>访问 <a target="_blank" rel="noopener" href="http://localhost:8080/actuator/">http://localhost:8080/actuator/</a>**</li>
+</ul>
+<p>（一般格式：<a target="_blank" rel="noopener" href="http://localhost:8080/actuator/endpointName/detailPath">http://localhost:8080/actuator/endpointName/detailPath</a> ）</p>
+<p>例如：</p>
+<p><a target="_blank" rel="noopener" href="http://localhost:8080/actuator/beans">http://localhost:8080/actuator/beans</a></p>
+<p><a target="_blank" rel="noopener" href="http://localhost:8080/actuator/configprops">http://localhost:8080/actuator/configprops</a></p>
+<p><a target="_blank" rel="noopener" href="http://localhost:8080/actuator/metrics">http://localhost:8080/actuator/metrics</a></p>
+<p><a target="_blank" rel="noopener" href="http://localhost:8080/actuator/metrics/jvm.gc.pause">http://localhost:8080/actuator/metrics/jvm.gc.pause</a></p>
+<hr>
+<h2 id="2-Actuator-Endpoint"><a href="#2-Actuator-Endpoint" class="headerlink" title="2. Actuator Endpoint"></a>2. Actuator Endpoint</h2><p>常用端点：</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>auditevents</code></td>
+<td>暴露当前应用程序的审核事件信息。需要一个<code>AuditEventRepository组件</code>。</td>
+</tr>
+<tr>
+<td><code>beans</code></td>
+<td>显示应用程序中所有Spring Bean的完整列表。</td>
+</tr>
+<tr>
+<td><code>caches</code></td>
+<td>暴露可用的缓存。</td>
+</tr>
+<tr>
+<td><code>conditions</code></td>
+<td>显示自动配置的所有条件信息，包括匹配或不匹配的原因。</td>
+</tr>
+<tr>
+<td><code>configprops</code></td>
+<td>显示所有<code>@ConfigurationProperties</code>。</td>
+</tr>
+<tr>
+<td><code>env</code></td>
+<td>暴露Spring的属性<code>ConfigurableEnvironment</code></td>
+</tr>
+<tr>
+<td><code>flyway</code></td>
+<td>显示已应用的所有Flyway数据库迁移。 需要一个或多个<code>Flyway</code>组件。</td>
+</tr>
+<tr>
+<td><code>health</code></td>
+<td>显示应用程序运行状况信息。</td>
+</tr>
+<tr>
+<td><code>httptrace</code></td>
+<td>显示HTTP跟踪信息（默认情况下，最近100个HTTP请求-响应）。需要一个<code>HttpTraceRepository</code>组件。</td>
+</tr>
+<tr>
+<td><code>info</code></td>
+<td>显示应用程序信息。</td>
+</tr>
+<tr>
+<td><code>integrationgraph</code></td>
+<td>显示Spring <code>integrationgraph</code> 。需要依赖<code>spring-integration-core</code>。</td>
+</tr>
+<tr>
+<td><code>loggers</code></td>
+<td>显示和修改应用程序中日志的配置。</td>
+</tr>
+<tr>
+<td><code>liquibase</code></td>
+<td>显示已应用的所有Liquibase数据库迁移。需要一个或多个<code>Liquibase</code>组件。</td>
+</tr>
+<tr>
+<td><code>metrics</code></td>
+<td>显示当前应用程序的“指标”信息。</td>
+</tr>
+<tr>
+<td><code>mappings</code></td>
+<td>显示所有<code>@RequestMapping</code>路径列表。</td>
+</tr>
+<tr>
+<td><code>scheduledtasks</code></td>
+<td>显示应用程序中的计划任务。</td>
+</tr>
+<tr>
+<td><code>sessions</code></td>
+<td>允许从Spring Session支持的会话存储中检索和删除用户会话。需要使用Spring Session的基于Servlet的Web应用程序。</td>
+</tr>
+<tr>
+<td><code>shutdown</code></td>
+<td>使应用程序正常关闭。默认禁用。</td>
+</tr>
+<tr>
+<td><code>startup</code></td>
+<td>显示由<code>ApplicationStartup</code>收集的启动步骤数据。需要使用<code>SpringApplication</code>进行配置<code>BufferingApplicationStartup</code>。</td>
+</tr>
+<tr>
+<td><code>threaddump</code></td>
+<td>执行线程转储。</td>
+</tr>
+</tbody></table>
+<p>如果应用程序是Web应用程序（Spring MVC，Spring WebFlux或Jersey），则可以使用以下附加端点：</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>heapdump</code></td>
+<td>返回<code>hprof</code>堆转储文件。</td>
+</tr>
+<tr>
+<td><code>jolokia</code></td>
+<td>通过HTTP暴露JMX bean（需要引入Jolokia，不适用于WebFlux）。需要引入依赖<code>jolokia-core</code>。</td>
+</tr>
+<tr>
+<td><code>logfile</code></td>
+<td>返回日志文件的内容（如果已设置<code>logging.file.name</code>或<code>logging.file.path</code>属性）。支持使用HTTP<code>Range</code>标头来检索部分日志文件的内容。</td>
+</tr>
+<tr>
+<td><code>prometheus</code></td>
+<td>以Prometheus服务器可以抓取的格式公开指标。需要依赖<code>micrometer-registry-prometheus</code>。</td>
+</tr>
+</tbody></table>
+<p>最常用的：</p>
+<ul>
+<li>Health：监控状况</li>
+<li>Metrics：运行时指标</li>
+<li>Loggers：日志记录</li>
+</ul>
+<h3 id="2-1-Health-Endpoint"><a href="#2-1-Health-Endpoint" class="headerlink" title="2.1 Health Endpoint"></a>2.1 Health Endpoint</h3><p>健康检查端点，一般用于在云平台，平台会定时的检查应用的健康状况，我们就需要Health Endpoint可以为平台返回当前应用的一系列组件健康状况的集合。</p>
+<p><img src="image.png" alt="image"></p>
+<h3 id="2-2-Metrics-Endpoint"><a href="#2-2-Metrics-Endpoint" class="headerlink" title="2.2 Metrics Endpoint"></a>2.2 Metrics Endpoint</h3><p>提供详细的、层级的、空间指标信息，这些信息可以被pull（主动推送）或者push（被动获取）方式得到</p>
+<ul>
+<li><p>通过Metrics对接多种监控系统</p>
+</li>
+<li><p>简化核心Metrics开发</p>
+</li>
+<li><p>添加自定义Metrics或者扩展已有Metrics</p>
+</li>
+</ul>
+<p><img src="image1.png" alt="image1"></p>
+<p>如果想要更详细的信息，可以二次请求：</p>
+<p><a target="_blank" rel="noopener" href="http://localhost:8080/actuator/metrics">http://localhost:8080/actuator/metrics</a> 访问上图页面，比如要查看jvm.gc.pause的详细信息，发送请求：</p>
+<p><a target="_blank" rel="noopener" href="http://localhost:8080/actuator/metrics/jvm.gc.pause">http://localhost:8080/actuator/metrics/jvm.gc.pause</a></p>
+<h3 id="2-3-管理Endpoints"><a href="#2-3-管理Endpoints" class="headerlink" title="2.3 管理Endpoints"></a>2.3 管理Endpoints</h3><p>需要开启或禁用某个Endpoint：management.endpoint.<strong>endpointName</strong>.enabled = true / false</p>
+<p>可以禁用所有的Endpoint然后手动开启指定的Endpoint：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">management:</span></span><br><span class="line">  <span class="attr">endpoints:</span></span><br><span class="line">    <span class="attr">enabled-by-default:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">endpoint:</span></span><br><span class="line">    <span class="attr">beans:</span></span><br><span class="line">      <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">health:</span></span><br><span class="line">      <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">metrics:</span></span><br><span class="line">      <span class="attr">enabled:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<hr>
+<h2 id="3-定制Endpoint"><a href="#3-定制Endpoint" class="headerlink" title="3. 定制Endpoint"></a>3. 定制Endpoint</h2><h3 id="3-1-定制Health信息"><a href="#3-1-定制Health信息" class="headerlink" title="3.1 定制Health信息"></a>3.1 定制Health信息</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyComHealthIndicator</span> <span class="keyword">extends</span> <span class="title class_">AbstractHealthIndicator</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 真实的检查方法</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> builder</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> Exception</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doHealthCheck</span><span class="params">(Health.Builder builder)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">//mongodb。  获取连接进行测试</span></span><br><span class="line">        Map&lt;String,Object&gt; map = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">        <span class="comment">// 检查完成</span></span><br><span class="line">        <span class="keyword">if</span>(<span class="number">1</span> == <span class="number">2</span>)&#123;</span><br><span class="line"><span class="comment">//            builder.up(); //健康</span></span><br><span class="line">            builder.status(Status.UP);</span><br><span class="line">            map.put(<span class="string">&quot;count&quot;</span>,<span class="number">1</span>);</span><br><span class="line">            map.put(<span class="string">&quot;ms&quot;</span>,<span class="number">100</span>);</span><br><span class="line">        &#125;<span class="keyword">else</span> &#123;</span><br><span class="line"><span class="comment">//            builder.down();</span></span><br><span class="line">            builder.status(Status.OUT_OF_SERVICE);</span><br><span class="line">            map.put(<span class="string">&quot;err&quot;</span>,<span class="string">&quot;连接超时&quot;</span>);</span><br><span class="line">            map.put(<span class="string">&quot;ms&quot;</span>,<span class="number">3000</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        builder.withDetail(<span class="string">&quot;code&quot;</span>,<span class="number">100</span>)</span><br><span class="line">                .withDetails(map);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-定制info信息"><a href="#3-2-定制info信息" class="headerlink" title="3.2 定制info信息"></a>3.2 定制info信息</h3><p>常用两种方式：</p>
+<ol>
+<li>编写配置文件</li>
+</ol>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">info:</span></span><br><span class="line">  <span class="attr">appName:</span> <span class="string">boot-admin</span></span><br><span class="line">  <span class="attr">version:</span> <span class="number">2.0</span><span class="number">.1</span></span><br><span class="line">  <span class="attr">mavenProjectName:</span> <span class="string">@project.artifactId@</span>  <span class="comment">#使用@@可以获取maven的pom文件值</span></span><br><span class="line">  <span class="attr">mavenProjectVersion:</span> <span class="string">@project.version@</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>编写InfoContributor</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.Collections;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.actuate.info.Info;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.actuate.info.InfoContributor;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Component;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ExampleInfoContributor</span> <span class="keyword">implements</span> <span class="title class_">InfoContributor</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">contribute</span><span class="params">(Info.Builder builder)</span> &#123;</span><br><span class="line">        builder.withDetail(<span class="string">&quot;example&quot;</span>,</span><br><span class="line">                Collections.singletonMap(<span class="string">&quot;key&quot;</span>, <span class="string">&quot;value&quot;</span>));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>发送 <a target="_blank" rel="noopener" href="http://localhost:8080/actuator/info">http://localhost:8080/actuator/info</a> 会输出以上方式返回的所有info信息</p>
+<h3 id="3-3-定制Metrics信息"><a href="#3-3-定制Metrics信息" class="headerlink" title="3.3 定制Metrics信息"></a>3.3 定制Metrics信息</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MyService</span>&#123;</span><br><span class="line">    Counter counter;</span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">MyService</span><span class="params">(MeterRegistry meterRegistry)</span>&#123;</span><br><span class="line">         counter = meterRegistry.counter(<span class="string">&quot;myservice.method.running.counter&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">hello</span><span class="params">()</span> &#123;</span><br><span class="line">        counter.increment();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//也可以使用下面的方式</span></span><br><span class="line"><span class="meta">@Bean</span></span><br><span class="line">MeterBinder <span class="title function_">queueSize</span><span class="params">(Queue queue)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> (registry) -&gt; Gauge.builder(<span class="string">&quot;queueSize&quot;</span>, queue::size).register(registry);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-4-定制Endpoint"><a href="#3-4-定制Endpoint" class="headerlink" title="3.4 定制Endpoint"></a>3.4 定制Endpoint</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@Endpoint(id = &quot;container&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">DockerEndpoint</span> &#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@ReadOperation</span></span><br><span class="line">    <span class="keyword">public</span> Map <span class="title function_">getDockerInfo</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Collections.singletonMap(<span class="string">&quot;info&quot;</span>,<span class="string">&quot;docker started...&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@WriteOperation</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">restartDocker</span><span class="params">()</span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;docker restarted....&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//一个读方法 一个写方法</span></span><br></pre></td></tr></table></figure>
+
+
+
+<hr>
+<h2 id="4-可视化界面展示监控数据"><a href="#4-可视化界面展示监控数据" class="headerlink" title="4. 可视化界面展示监控数据"></a>4. 可视化界面展示监控数据</h2><p><a target="_blank" rel="noopener" href="https://github.com/codecentric/spring-boot-admin">https://github.com/codecentric/spring-boot-admin</a></p>
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+                <div class="icon arrow-left"></div>
+                <div class="post-link">
+                    <a href="/2021/12/06/SpringBoot2-%E9%AB%98%E7%BA%A7%E7%89%B9%E6%80%A7/">Prev</a>
+                </div>
+            
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2021/12/05/SpringBoot2-%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+                Ye Yang | 
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://hexo.io/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+  </body>
+</html>

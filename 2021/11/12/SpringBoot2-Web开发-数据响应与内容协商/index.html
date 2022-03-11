@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ch">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="yeung">
+
+
+
+
+
+
+
+<title>SpringBoot2-Web开发-数据响应与内容协商 | YE&#39;s BLOG</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+
+
+
+  <meta name="generator" content="Hexo 5.4.1"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">Ultralight Beam.</a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archives</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/about/">About</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/tag/">Tags</a>
+              </li> 
+                   
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/SpringBoot/">
+                            SpringBoot
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                SpringBoot2-Web开发-数据响应与内容协商
+            
+            
+        </div>
+        <span class="post-date">
+            11 12, 2021
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h1 id="SpringBoot-Web开发"><a href="#SpringBoot-Web开发" class="headerlink" title="SpringBoot Web开发"></a>SpringBoot Web开发</h1><h2 id="数据响应与内容协商"><a href="#数据响应与内容协商" class="headerlink" title="数据响应与内容协商"></a>数据响应与内容协商</h2><h3 id="1-响应JSON"><a href="#1-响应JSON" class="headerlink" title="1. 响应JSON"></a>1. 响应JSON</h3><h4 id="jackson-jar-ResponseBody"><a href="#jackson-jar-ResponseBody" class="headerlink" title="jackson.jar + @ResponseBody"></a>jackson.jar + @ResponseBody</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">        <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">web场景自动引入了json场景</span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-json<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.3.4.RELEASE<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">scope</span>&gt;</span>compile<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><img src="image11.png" alt="image11"></p>
+<p>给前端自动返回JSON数据</p>
+<ul>
+<li><strong>返回值处理器</strong></li>
+</ul>
+<p><img src="image12.png" alt="image12"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">			<span class="built_in">this</span>.returnValueHandlers.handleReturnValue(</span><br><span class="line">					returnValue, getReturnValueType(returnValue), mavContainer, webRequest);</span><br><span class="line">		&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">handleReturnValue</span><span class="params">(<span class="meta">@Nullable</span> Object returnValue, MethodParameter returnType,</span></span><br><span class="line"><span class="params">		ModelAndViewContainer mavContainer, NativeWebRequest webRequest)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line"></span><br><span class="line">	<span class="type">HandlerMethodReturnValueHandler</span> <span class="variable">handler</span> <span class="operator">=</span> selectHandler(returnValue, returnType);</span><br><span class="line">	<span class="keyword">if</span> (handler == <span class="literal">null</span>) &#123;</span><br><span class="line">		<span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>(<span class="string">&quot;Unknown return value type: &quot;</span> + returnType.getParameterType().getName());</span><br><span class="line">	&#125;</span><br><span class="line">	handler.handleReturnValue(returnValue, returnType, mavContainer, webRequest);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>返回值处理器原理</strong></li>
+</ul>
+<p><img src="image13.png" alt="image13"></p>
+<p>（1）返回值处理器判断是否支持这种类型的返回值: supportsReturnType() </p>
+<p>（2）如果支持，返回值处理器调用handleReturnValue()进行处理</p>
+<p>（3）举例：RequestResponseBodyMethodProcessor可以处理返回值标注了@ResponseBody注解的</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//RequestResponseBodyMethodProcessor  	</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">handleReturnValue</span><span class="params">(<span class="meta">@Nullable</span> Object returnValue, MethodParameter returnType,</span></span><br><span class="line"><span class="params">			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)</span></span><br><span class="line">			<span class="keyword">throws</span> IOException, HttpMediaTypeNotAcceptableException, HttpMessageNotWritableException &#123;</span><br><span class="line"></span><br><span class="line">		mavContainer.setRequestHandled(<span class="literal">true</span>);</span><br><span class="line">		<span class="type">ServletServerHttpRequest</span> <span class="variable">inputMessage</span> <span class="operator">=</span> createInputMessage(webRequest);</span><br><span class="line">		<span class="type">ServletServerHttpResponse</span> <span class="variable">outputMessage</span> <span class="operator">=</span> createOutputMessage(webRequest);</span><br><span class="line"></span><br><span class="line">		<span class="comment">// Try even with null return value. ResponseBodyAdvice could get involved.</span></span><br><span class="line">        <span class="comment">// 使用消息转换器进行写出操作</span></span><br><span class="line">		writeWithMessageConverters(returnValue, returnType, inputMessage, outputMessage);</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<p>（1）利用MessageConverters进行处理 将数据写为JSON</p>
+<p>（1.1）内容协商：浏览器默认会以请求头的方式告诉服务器它能接收什么样的内容类型</p>
+<p>（1.2）服务器最终根据自己自身的能力，决定服务器能生产出什么样类型的数据</p>
+<p>（1.3）SpringMVC会遍历所有容器底层的HttpMessageConverter，看谁能处理</p>
+<p>（1.3.1）遍历得到MappingJackson2HttpMessageConverter</p>
+<p>（1.3.2）利用MappingJackson2HttpMessageConverter将对象转为JSON再写出去</p>
+<h4 id="SpringMVC支持哪些返回值"><a href="#SpringMVC支持哪些返回值" class="headerlink" title="SpringMVC支持哪些返回值"></a>SpringMVC支持哪些返回值</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">ModelAndView</span><br><span class="line">Model</span><br><span class="line">View</span><br><span class="line">ResponseEntity </span><br><span class="line">ResponseBodyEmitter</span><br><span class="line">StreamingResponseBody</span><br><span class="line">HttpEntity</span><br><span class="line">HttpHeaders</span><br><span class="line">Callable</span><br><span class="line">DeferredResult</span><br><span class="line">ListenableFuture</span><br><span class="line">CompletionStage</span><br><span class="line">WebAsyncTask</span><br><span class="line">返回值有<span class="meta">@ModelAttribute</span>注解且为对象类型的</span><br><span class="line">标注了<span class="meta">@ResponseBody</span> 注解的 <span class="comment">//RequestResponseBodyMethodProcessor调用这个处理器</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="HttpMessageConverter原理"><a href="#HttpMessageConverter原理" class="headerlink" title="HttpMessageConverter原理"></a>HttpMessageConverter原理</h4><ul>
+<li><strong>MessageConverter规范</strong></li>
+</ul>
+<p><img src="image14.png" alt="image14"></p>
+<p>HttpMessageConverter: 看是否支持将此Class类型的对象，转为MediaType类型的数据</p>
+<p>例子：将Person对象转为JSON（write,响应）/ 将JSON转为Person（read,请求）（可逆的）</p>
+<ul>
+<li><strong>默认的MessageConverter</strong></li>
+</ul>
+<p><img src="image15.png" alt="image15"></p>
+<p>0 - 只支持Byte类型的</p>
+<p>1 - String</p>
+<p>2 - String</p>
+<p>3 - Resource</p>
+<p>4 - ResourceRegion</p>
+<p>5 - DOMSource.class / SAXSource.class / StAXSource.class / StreamSource.class / Source.class</p>
+<p>6 - MultiValueMap</p>
+<p>7 - 返回true</p>
+<p>8 - 返回true</p>
+<p>9 - 支持注解方式xml处理的</p>
+<p>最终MappingJackson2HttpMessageConverter利用底层的jackson的objectMapper把对象转为JSON</p>
+<p><img src="image16.png" alt="image16"></p>
+<hr>
+<h3 id="2-内容协商"><a href="#2-内容协商" class="headerlink" title="2.内容协商"></a>2.内容协商</h3><p>根据客户端接收能力不同，返回不同媒体类型的数据</p>
+<h4 id="引入xml依赖"><a href="#引入xml依赖" class="headerlink" title="引入xml依赖"></a>引入xml依赖</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"> <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.fasterxml.jackson.dataformat<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jackson-dataformat-xml<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="开启浏览器参数方式内容协商功能"><a href="#开启浏览器参数方式内容协商功能" class="headerlink" title="开启浏览器参数方式内容协商功能"></a>开启浏览器参数方式内容协商功能</h4><p>为了方便内容协商，开启基于请求参数的内容协商功能</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">    <span class="attr">contentnegotiation:</span></span><br><span class="line">      <span class="attr">favor-parameter:</span> <span class="literal">true</span>  <span class="comment">#开启请求参数内容协商模式</span></span><br></pre></td></tr></table></figure>
+
+<p>发送请求时可以选择转换为哪种类型：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://localhost:8080/test/person?format=json">http://localhost:8080/test/person?format=json</a></li>
+<li><a target="_blank" rel="noopener" href="http://localhost:8080/test/person?format=xml">http://localhost:8080/test/person?format=xml</a></li>
+</ul>
+<p><img src="image21.png" alt="image21"></p>
+<p>确定客户端接收什么样的内容类型</p>
+<ul>
+<li>Parameter策略优先确定是要返回JSON数据（根据下图方法，获取请求中format的值，确定要返回JSON）</li>
+</ul>
+<p><img src="image22.png" alt="image22"></p>
+<ul>
+<li>最终进行内容协商返回给客户端JSON即可</li>
+</ul>
+<h4 id="内容协商原理"><a href="#内容协商原理" class="headerlink" title="内容协商原理"></a>内容协商原理</h4><p>（1）判断当前响应头中是否已经有确定的媒体类型MediaType</p>
+<p>（2）获取客户端（浏览器）支持接受的内容类型（获取客户端Accept请求头字段)</p>
+<ul>
+<li>contentNegotiationManager 内容协商管理器 默认使用基于请求头的策略</li>
+</ul>
+<p><img src="image19.png" alt="image19"></p>
+<ul>
+<li>调用HeaderContentNegotiationStrategy()方法确定客户端可以接收的内容类型</li>
+</ul>
+<p><img src="image20.png" alt="image20"></p>
+<p>（3）遍历循环所有当前系统的MessageConverter，看谁支持操作这个对象</p>
+<p><img src="image17.png" alt="image17"></p>
+<p>（4）找到支持操作这个对象的Converter，把Converter支持的媒体类型统计出来</p>
+<p>（5）例子中，客户端需要application/xml，服务器端通过统计，发现能处理以下10种类型</p>
+<p><img src="image18.png" alt="image18"></p>
+<p>（6）遍历循环，进行内容协商的最佳匹配，找出匹配的媒体类型</p>
+<p>（7）调用支持将对象转为最佳匹配的媒体类型的Converter进行转换</p>
+<p>只要导入了jackson处理xml的包，xml的converter就会自动进来</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//WebMvcConfigurationSupport类中</span></span><br><span class="line">jackson2XmlPresent = ClassUtils.isPresent(<span class="string">&quot;com.fasterxml.jackson.dataformat.xml.XmlMapper&quot;</span>, classLoader);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (jackson2XmlPresent) &#123;</span><br><span class="line">			<span class="type">Jackson2ObjectMapperBuilder</span> <span class="variable">builder</span> <span class="operator">=</span> Jackson2ObjectMapperBuilder.xml();</span><br><span class="line">			<span class="keyword">if</span> (<span class="built_in">this</span>.applicationContext != <span class="literal">null</span>) &#123;</span><br><span class="line">				builder.applicationContext(<span class="built_in">this</span>.applicationContext);</span><br><span class="line">			&#125;</span><br><span class="line">			messageConverters.add(<span class="keyword">new</span> <span class="title class_">MappingJackson2XmlHttpMessageConverter</span>(builder.build()));</span><br><span class="line">		&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="自定义MessageConverter"><a href="#自定义MessageConverter" class="headerlink" title="自定义MessageConverter"></a>自定义MessageConverter</h4><p>实现多协议数据兼容：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">三个需求：</span></span><br><span class="line"><span class="comment">1.浏览器发请求直接返回xml --&gt; [application/xml] --&gt; 需要jacksonXmlConverter</span></span><br><span class="line"><span class="comment">2.如果是ajax请求 返回json --&gt; [application/json] --&gt; 需要jacksonJsonConverter</span></span><br><span class="line"><span class="comment">3.如果是app发请求 返回自定义协议数据 --&gt; [application/x-ye] --&gt; 需要xxxxConverter</span></span><br><span class="line"><span class="comment">				要求格式：属性值1;属性值2;...</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">步骤：</span></span><br><span class="line"><span class="comment">1.添加自定义的MessageConverter进系统底层</span></span><br><span class="line"><span class="comment">2.系统底层统计出所有MessageConverter能操作哪些类型</span></span><br><span class="line"><span class="comment">3.客户端内容协商</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="meta">@ResponseBody</span></span><br><span class="line"><span class="meta">@GetMapping(value = &quot;/test/person&quot;)</span></span><br><span class="line"><span class="keyword">public</span> Person <span class="title function_">getPerson</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">Person</span> <span class="variable">person</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Person</span>();</span><br><span class="line">    person.setAge(<span class="number">28</span>);</span><br><span class="line">    person.setBirth(<span class="keyword">new</span> <span class="title class_">Date</span>());</span><br><span class="line">    person.setUsername(<span class="string">&quot;ye&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> person;     </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>一切SpringMvc的自定义都在WebMvcConfigurer组件中进行配置</p>
+<ul>
+<li><strong>通过改变请求头中的Accept字段进行内容协商写多个数据</strong></li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//YeMessageConverter.java</span></span><br><span class="line"><span class="comment">//自定义的Converter</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">YeMessageConverter</span> <span class="keyword">implements</span> <span class="title class_">HttpMessageConverter</span>&lt;Person&gt;&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">canRead</span><span class="params">(Class&lt;?&gt; clazz, MediaType mediaType)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">canWrite</span><span class="params">(Class&lt;?&gt; clazz, MediaType mediaType)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> clazz.isAssignableFrom(Person.class);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//服务器要统计所有MessageConverter都能写出哪些内容类型</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> List&lt;MediaType&gt; <span class="title function_">getSupportedMediaTypes</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="comment">//自定义类型</span></span><br><span class="line">        <span class="keyword">return</span> MediaType.parseMediaTypes(<span class="string">&quot;application/x-ye&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Person <span class="title function_">read</span><span class="params">(Class&lt;? extends Person&gt; clazz, HttpInputMessage inputMessage)</span> <span class="keyword">throws</span> IOException&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Person <span class="title function_">write</span><span class="params">(Person person, MediaType contentType, HttpOutputMessage outputMessage)</span> <span class="keyword">throws</span> IOException&#123;</span><br><span class="line">        <span class="comment">//自定义协议数据的写出</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">data</span> <span class="operator">=</span> person.getUsername() + <span class="string">&quot;;&quot;</span> + person.getAge() + <span class="string">&quot;;&quot;</span> + person.getBirth();</span><br><span class="line">        <span class="comment">//写出去</span></span><br><span class="line">        <span class="type">OutputStream</span> <span class="variable">body</span> <span class="operator">=</span> outputMessage.getBody();</span><br><span class="line">        body.write(data.getBytes());</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line">   <span class="keyword">public</span> WebMvcConfigurer <span class="title function_">webMvcConfigurer</span><span class="params">()</span>&#123;</span><br><span class="line">       <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">WebMvcConfigurer</span>() &#123;</span><br><span class="line"></span><br><span class="line">           <span class="meta">@Override</span></span><br><span class="line">           <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">extendMessageConverters</span><span class="params">(List&lt;HttpMessageConverter&lt;?&gt;&gt; converters)</span> &#123;</span><br><span class="line">               converters.add(<span class="keyword">new</span> <span class="title class_">YeMessageConverter</span>());</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li><strong>通过改变请求参数进行内容协商</strong></li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line">   <span class="keyword">public</span> WebMvcConfigurer <span class="title function_">webMvcConfigurer</span><span class="params">()</span>&#123;</span><br><span class="line">       <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">WebMvcConfigurer</span>() &#123;</span><br><span class="line">           <span class="meta">@Override</span></span><br><span class="line">           <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">configureContentNegotiation</span><span class="params">(ContentNegotiationConfigurer configurer)</span>&#123;</span><br><span class="line">               Map&lt;String, MediaType&gt; mediaTypes = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">               mediaTypes.put(<span class="string">&quot;json&quot;</span>,MediaType.APPLICATION_JSON);</span><br><span class="line">               mediaTypes.put(<span class="string">&quot;xml&quot;</span>,MediaType.APPLICATION_XML);</span><br><span class="line">               mediaTypes.put(<span class="string">&quot;ye&quot;</span>,MediaType.parseMediaType(<span class="string">&quot;application/x-ye&quot;</span>));</span><br><span class="line">               <span class="comment">//指定支持解析哪些参数对应的哪些媒体类型</span></span><br><span class="line">               <span class="type">ParameterContentNegotiationStrategy</span> <span class="variable">parameterStrategy</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ParameterContentNegotiationStrategy</span>(mediaTypes);</span><br><span class="line">               </span><br><span class="line">               <span class="comment">//这样修改之后，会导致只有基于请求参数的策略，基于请求头的策略就被覆盖了，所以要手动添加进去</span></span><br><span class="line">               <span class="type">HeaderContentNegotiationStrategy</span> <span class="variable">headerStrategy</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HeaderContentNegotiationStrategy</span>();</span><br><span class="line">               </span><br><span class="line">               congifurer.strategies(Arrays.asList(parameterStrategy, headerStrategy));</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样一来，就可以在访问时通过改变请求参数进行内容协商：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://localhost:8080/test/person?format=json">http://localhost:8080/test/person?format=json</a></li>
+<li><a target="_blank" rel="noopener" href="http://localhost:8080/test/person?format=xml">http://localhost:8080/test/person?format=xml</a></li>
+<li><a target="_blank" rel="noopener" href="http://localhost:8080/test/person?format=ye">http://localhost:8080/test/person?format=ye</a></li>
+</ul>
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+                <div class="icon arrow-left"></div>
+                <div class="post-link">
+                    <a href="/2021/11/15/SpringBoot2-Web%E5%BC%80%E5%8F%91-%E6%8B%A6%E6%88%AA%E5%99%A8+%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/">Prev</a>
+                </div>
+            
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2021/11/08/SpringBoot2-Web%E5%BC%80%E5%8F%91-%E8%AF%B7%E6%B1%82%E5%8F%82%E6%95%B0%E5%A4%84%E7%90%86/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+                Ye Yang | 
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://hexo.io/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+  </body>
+</html>

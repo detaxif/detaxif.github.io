@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ch">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="yeung">
+
+
+
+
+
+
+
+<title>RabbitMQ-发布确认高级+幂等性 | YE&#39;s BLOG</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+
+
+
+  <meta name="generator" content="Hexo 5.4.1"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">Ultralight Beam.</a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archives</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/about/">About</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/tag/">Tags</a>
+              </li> 
+                   
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/RabbitMQ/">
+                            RabbitMQ
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                RabbitMQ-发布确认高级+幂等性
+            
+            
+        </div>
+        <span class="post-date">
+            01 19, 2022
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h1 id="RabbitMQ-发布确认高级-幂等性"><a href="#RabbitMQ-发布确认高级-幂等性" class="headerlink" title="RabbitMQ 发布确认高级+幂等性"></a>RabbitMQ 发布确认高级+幂等性</h1><h2 id="9-发布确认高级"><a href="#9-发布确认高级" class="headerlink" title="9. 发布确认高级"></a>9. 发布确认高级</h2><h3 id="9-1-发布确认整合SpringBoot代码"><a href="#9-1-发布确认整合SpringBoot代码" class="headerlink" title="9.1 发布确认整合SpringBoot代码"></a>9.1 发布确认整合SpringBoot代码</h3><p>在SpringBoot中使用发布确认，首先在yaml中添加一行配置：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">	<span class="attr">rabbit:</span></span><br><span class="line">		<span class="string">publisher-confirm-type</span> <span class="string">=</span> <span class="string">correlated</span></span><br></pre></td></tr></table></figure>
+
+<p>publisher-confirm-type有三个值：</p>
+<ul>
+<li>NONE：禁用发布确认模式，是默认值。</li>
+<li>CORRELATED：发布消息成功到交换机后会触发回调方法。</li>
+<li>SIMPLE：效果和CORRELATED一样会触发回调方法，在发布消息成功后使用rabbitTemplate调用waitForConfirms()或waitForConfirmsOrDie()方法，等待broker节点返回发送结果，根据返回结果判定下一步逻辑。注意waitForConfirmsOrDie()方法如果返回false，则会关闭channel，接下来无法发送消息到broker。</li>
+</ul>
+<p>代码架构图：</p>
+<p><img src="img1.png" alt="img1"></p>
+<p>配置类ConfirmConfig</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ConfirmConfig</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">confirm_exchange_name</span> <span class="operator">=</span> <span class="string">&quot;confirm.exchange&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">confirm_queue_name</span> <span class="operator">=</span> <span class="string">&quot;confirm.queue&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean(&quot;confirmExchange&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> DirectExchange <span class="title function_">confirmExchange</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">DirectExchange</span>(confirm_exchange_name);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean(&quot;confirmQueue&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> Queue <span class="title function_">confirmQueue</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> QueueBuilder.durable(confirm_queue_name).build();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> Binding <span class="title function_">queueBinding</span><span class="params">(<span class="meta">@Qualifier(&quot;confirmQueue&quot;)</span> Queue queue,</span></span><br><span class="line"><span class="params">                                <span class="meta">@Qualifier(&quot;confirmExchange&quot;)</span> DirectExchange exchange)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> BindingBuilder.bind(queue).to(exchange).with(<span class="string">&quot;key1&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Controller</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@GetMapping(&quot;sendMessage/&#123;message&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">sendMessage</span><span class="params">(<span class="meta">@PathVariable</span> String message)</span>&#123;</span><br><span class="line">        rabbitTemplate.convertAndSend(confirm_exchange_name,<span class="string">&quot;key1&quot;</span>,message);</span><br><span class="line">        log.info(<span class="string">&quot;当前时间&#123;&#125;发送一条消息&#123;&#125;&quot;</span>,<span class="keyword">new</span> <span class="title class_">Date</span>(),message);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>Consumer</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RabbitListener(queues = &quot;confirm.queue&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">receiveConfirm</span><span class="params">(Message msg)</span>&#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">message</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">String</span>(msg.getBody());</span><br><span class="line">        log.info(<span class="string">&quot;当前时间&#123;&#125;，收到确认队列的消息:&#123;&#125;&quot;</span>,<span class="keyword">new</span> <span class="title class_">Date</span>(),message);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>现在让RabbitMQ给生产者一个回馈。</strong></p>
+<p>首先要写一个自定义Callback类 MyCallback</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyCallback</span> <span class="keyword">implements</span> <span class="title class_">RabbitTemplate</span>.ConfirmCallback &#123;</span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">    * confirm()参数列表</span></span><br><span class="line"><span class="comment">    * 1. CorrelationData correlationData 相关性数据</span></span><br><span class="line"><span class="comment">    * 2. boolean ack rabbitMQ交换机是否收到消息</span></span><br><span class="line"><span class="comment">    * 3. String cause 没有收到消息的原因</span></span><br><span class="line"><span class="comment">    * */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">confirm</span><span class="params">(CorrelationData correlationData, <span class="type">boolean</span> ack, String cause)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span>(ack)&#123;</span><br><span class="line">            log.info(<span class="string">&quot;交换机已收到消息&quot;</span>);</span><br><span class="line">        &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">            log.info(<span class="string">&quot;交换机未收到消息，原因是:&quot;</span>+cause);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后在Controller中改写一下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;/confirm&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ConfirmController</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">confirm_exchange_name</span> <span class="operator">=</span> <span class="string">&quot;confirm.exchange&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> RabbitTemplate rabbitTemplate;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> MyCallback myCallback;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//等rabbitTemplate被注入后再对myCallback进行赋值，确保不会报错</span></span><br><span class="line">    <span class="meta">@PostConstruct</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">init</span><span class="params">()</span>&#123;</span><br><span class="line">        rabbitTemplate.setConfirmCallback(myCallback);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@GetMapping(&quot;sendMessage/&#123;message&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">sendMessage</span><span class="params">(<span class="meta">@PathVariable</span> String message)</span>&#123;</span><br><span class="line">        rabbitTemplate.convertAndSend(confirm_exchange_name,<span class="string">&quot;key1&quot;</span>,message);</span><br><span class="line">        log.info(<span class="string">&quot;当前时间&#123;&#125;发送一条消息&#123;&#125;&quot;</span>,<span class="keyword">new</span> <span class="title class_">Date</span>(),message);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>重点：注入MyCallback，用@PostConstruct注解一个init()方法确保对myCallback进行初始化，提取出来，也不用每一个方法里面都写一次setConfirmCallback()。</strong></p>
+<p>运行结果：</p>
+<p><img src="img2.jpg" alt="img2"></p>
+<h3 id="9-2-发布确认相关性数据"><a href="#9-2-发布确认相关性数据" class="headerlink" title="9.2 发布确认相关性数据"></a>9.2 发布确认相关性数据</h3><p>CorrelationData 相关性数据。可以提取消息的id，确认这是哪一条消息。</p>
+<p>在Controller的方法中</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@GetMapping(&quot;sendMessage/&#123;message&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">sendMessage</span><span class="params">(<span class="meta">@PathVariable</span> String message)</span>&#123;</span><br><span class="line">        <span class="type">CorrelationData</span> <span class="variable">correlationData</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CorrelationData</span>(<span class="string">&quot;1&quot;</span>);</span><br><span class="line">        rabbitTemplate.convertAndSend(confirm_exchange_name,<span class="string">&quot;key1&quot;</span>,message,correlationData);</span><br><span class="line">        log.info(<span class="string">&quot;当前时间&#123;&#125;发送一条消息&#123;&#125;&quot;</span>,<span class="keyword">new</span> <span class="title class_">Date</span>(),message);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>就可以在Callback中提取出消息的id</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">confirm</span><span class="params">(CorrelationData correlationData, <span class="type">boolean</span> ack, String cause)</span> &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">id</span> <span class="operator">=</span> correlationData != <span class="literal">null</span> ? correlationData.getId() : <span class="string">&quot;&quot;</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span>(ack)&#123;</span><br><span class="line">            log.info(<span class="string">&quot;交换机已收到id:&#123;&#125;的消息&quot;</span>,id);</span><br><span class="line">        &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">            log.info(<span class="string">&quot;交换机未收到id:&#123;&#125;的消息，原因是:&#123;&#125;&quot;</span>,id,cause);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-3-回退消息"><a href="#9-3-回退消息" class="headerlink" title="9.3 回退消息"></a>9.3 回退消息</h3><p>在仅开启了生产者确认机制的情况下，交换机接收到消息后，会直接给消息生产者发送确认消息，如果发现该消息不可路由，则会将消息直接丢弃，而生产者是不知道消息被丢弃了的。此时通过设置<strong>Mandatory参数</strong>，当消息不可到达目的地时将消息返回给生产者。</p>
+<p>在Controller的rabbitmqTemplate初始化中</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@PostConstruct</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">init</span><span class="params">()</span>&#123;</span><br><span class="line">    rabbitTemplate.setConfirmCallback(myCallback);</span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">    * setMandatory()</span></span><br><span class="line"><span class="comment">    * true:当交换机无法路由消息时，把消息返回给生产者</span></span><br><span class="line"><span class="comment">    * false：默认值，当交换机无法路由消息时，直接丢弃消息</span></span><br><span class="line"><span class="comment">    * */</span></span><br><span class="line">    rabbitTemplate.setMandatory(<span class="literal">true</span>);</span><br><span class="line">    rabbitTemplate.setReturnCallback(myCallback);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>在myCallback类中再实现一个接口RabbitTemplate.ReturnCallback</strong>，重写方法returnedMessage()</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//回退方法，当消息无法路由时调用这个方法</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">returnedMessage</span><span class="params">(Message message, <span class="type">int</span> replyCode, String replyText, String exchange, String routingKey)</span> &#123;</span><br><span class="line">    log.info(<span class="string">&quot;消息:&#123;&#125;，被交换机&#123;&#125;退回，退回原因&#123;&#125;，路由key:&#123;&#125;&quot;</span>,<span class="keyword">new</span> <span class="title class_">String</span>(message.getBody()),exchange,replyText,routingKey);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在Controller的方法中，在9.1的sendMessage()基础上再发送一条消息，routingKey为key2，因为没有和路由绑定key2的队列，所以回退该消息。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@GetMapping(&quot;sendMessage/&#123;message&#125;&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">sendMessage</span><span class="params">(<span class="meta">@PathVariable</span> String message)</span>&#123;</span><br><span class="line">    <span class="type">CorrelationData</span> <span class="variable">correlationData</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CorrelationData</span>(<span class="string">&quot;1&quot;</span>);</span><br><span class="line">    rabbitTemplate.convertAndSend(confirm_exchange_name,<span class="string">&quot;key1&quot;</span>,message,correlationData);</span><br><span class="line">    log.info(<span class="string">&quot;当前时间&#123;&#125;发送一条消息&#123;&#125;&quot;</span>,<span class="keyword">new</span> <span class="title class_">Date</span>(),message);</span><br><span class="line"></span><br><span class="line">    <span class="type">CorrelationData</span> <span class="variable">correlationData2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CorrelationData</span>(<span class="string">&quot;2&quot;</span>);</span><br><span class="line">    rabbitTemplate.convertAndSend(confirm_exchange_name,<span class="string">&quot;key2&quot;</span>,message,correlationData2);</span><br><span class="line">    log.info(<span class="string">&quot;当前时间&#123;&#125;发送一条消息&#123;&#125;&quot;</span>,<span class="keyword">new</span> <span class="title class_">Date</span>(),message);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-4-备份交换机"><a href="#9-4-备份交换机" class="headerlink" title="9.4 备份交换机"></a>9.4 备份交换机</h3><p>备份交换机理解：</p>
+<p>有了Mandatory参数和回退消息，我们可以处理无法投递的消息，但是手动处理这些消息很麻烦，而且当有多台生产者时很容易出错。</p>
+<p>由于不可路由消息根本没有机会进入队列，所以无法使用死信队列来保存消息。</p>
+<p>因此使用备份交换机来应对这个问题。备份交换机就是RabbitMQ中交换机的备胎，当交换机接收到一条不可路由消息时，将会把这条消息转发到备份交换机中，由备份交换机来进行转发和处理，通常备份交换机的类型为Fanout，这样就能把所有消息都投递到与其绑定的队列中，然后在备份交换机下绑定一个队列，这样所有那些原交换机无法路由的消息都会进入这个队列了。</p>
+<p><img src="img3.png" alt="img3"></p>
+<p>代码架构图：</p>
+<p><img src="img4.png" alt="img4"></p>
+<p>ConfirmConfig类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ConfirmConfig</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">confirm_exchange_name</span> <span class="operator">=</span> <span class="string">&quot;confirm.exchange&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">confirm_queue_name</span> <span class="operator">=</span> <span class="string">&quot;confirm.queue&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">backup_queue_name</span> <span class="operator">=</span> <span class="string">&quot;backup.queue&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">backup_exchange_name</span> <span class="operator">=</span> <span class="string">&quot;backup.exchange&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">warning_queue_name</span> <span class="operator">=</span> <span class="string">&quot;warning.queue&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean(&quot;confirmQueue&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> Queue <span class="title function_">confirmQueue</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> QueueBuilder.durable(confirm_queue_name).build();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//声明备份交换机</span></span><br><span class="line">    <span class="meta">@Bean(&quot;backupExchange&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> FanoutExchange <span class="title function_">backupExchange</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">FanoutExchange</span>(backup_exchange_name);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//声明确认交换机的备份交换机</span></span><br><span class="line">    <span class="meta">@Bean(&quot;confirmExchange&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> DirectExchange <span class="title function_">confirmExchange</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="type">ExchangeBuilder</span> <span class="variable">exchangeBuilder</span> <span class="operator">=</span></span><br><span class="line">                ExchangeBuilder.directExchange(confirm_exchange_name)</span><br><span class="line">                        .durable(<span class="literal">true</span>)</span><br><span class="line">                        .withArgument(<span class="string">&quot;alternate-exchange&quot;</span>,backup_exchange_name);</span><br><span class="line">        <span class="keyword">return</span> exchangeBuilder.build();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//声明备份队列</span></span><br><span class="line">    <span class="meta">@Bean(&quot;backupQueue&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> Queue <span class="title function_">backupQueue</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> QueueBuilder.durable(backup_queue_name).build();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//声明备份队列绑定关系</span></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> Binding <span class="title function_">backupBinding</span><span class="params">(<span class="meta">@Qualifier(&quot;backupQueue&quot;)</span> Queue queue,</span></span><br><span class="line"><span class="params">                                 <span class="meta">@Qualifier(&quot;backupExchange&quot;)</span>FanoutExchange backupExchange)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> BindingBuilder.bind(queue).to(backupExchange);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//声明警告队列</span></span><br><span class="line">    <span class="meta">@Bean(&quot;warningQueue&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> Queue <span class="title function_">warningQueue</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> QueueBuilder.durable(warning_queue_name).build();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//声明警告队列绑定关系</span></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> Binding <span class="title function_">warningBinding</span><span class="params">(<span class="meta">@Qualifier(&quot;warningQueue&quot;)</span> Queue queue,</span></span><br><span class="line"><span class="params">                                  <span class="meta">@Qualifier(&quot;backupExchange&quot;)</span> FanoutExchange backupExchange)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> BindingBuilder.bind(queue).to(backupExchange);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> Binding <span class="title function_">queueBinding</span><span class="params">(<span class="meta">@Qualifier(&quot;confirmQueue&quot;)</span> Queue queue,</span></span><br><span class="line"><span class="params">                                <span class="meta">@Qualifier(&quot;confirmExchange&quot;)</span> DirectExchange exchange)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> BindingBuilder.bind(queue).to(exchange).with(<span class="string">&quot;key1&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>警告队列的消费者WarningConsumer</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">WarningConsumer</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">warning_queue_name</span> <span class="operator">=</span> <span class="string">&quot;warning.queue&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RabbitListener(queues = warning_queue_name)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">receiveWarning</span><span class="params">(Message message)</span>&#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">msg</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">String</span>(message.getBody());</span><br><span class="line">        log.info(<span class="string">&quot;接收到警告队列:&#123;&#125;，消息内容:&#123;&#125;&quot;</span>,warning_queue_name,msg);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用9.3中的Controller方法，运行结果：</p>
+<p><img src="img5.jpg" alt="img5"></p>
+<p><strong>注意：mandatory参数与备份交换机一起使用的时候，如果两者同时开启，备份交换机优先级高，消息优先去备份交换机那里。</strong></p>
+<hr>
+<h2 id="10-幂等性"><a href="#10-幂等性" class="headerlink" title="10.幂等性"></a>10.幂等性</h2><h3 id="10-1-概念"><a href="#10-1-概念" class="headerlink" title="10.1 概念"></a>10.1 概念</h3><p>用户对于同一操作发起的一次请求或多次请求的结果是一样的，不会因为多次点击而产生副作用。</p>
+<p>例如，用户支付，如果第一次支付时网络错误，用户再点一次付款，如果没有幂等性，用户就会付款两次。</p>
+<h3 id="10-2-消息的重复消费"><a href="#10-2-消息的重复消费" class="headerlink" title="10.2 消息的重复消费"></a>10.2 消息的重复消费</h3><p>消费者在消费MQ中的消息时，MQ已把消息发送给消费者，消费者在给MQ返回ack时网络中断，因此MQ没有收到确认信息，该条消息会重新发给其他的消费者，或在网络重连后再次发送给该消费者，但实际上该消费者已经成功消费了这条消息，造成消费者消费了重复的消息。</p>
+<h3 id="10-3-解决思路"><a href="#10-3-解决思路" class="headerlink" title="10.3 解决思路"></a>10.3 解决思路</h3><p>使用全局ID或写一个唯一标识，每次消费消息时先用该id判断该消息是否消费过。</p>
+<p>有两种方法：</p>
+<ul>
+<li>唯一ID+指纹码机制：使用时间戳或别的服务给到唯一的信息码，拼接简单。但劣势是，高并发时，多个请求需要在数据库中进行查询，浪费性能，因此不推荐。</li>
+<li>Redis原子性：利用redis执行setnx命令，天然具有幂等性，从而实现不重复消费。（setnx命令，如果key在redis里已经存在了，那么执行命令就会失败，只有key不存在于redis中，命令才能执行成功。）</li>
+</ul>
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+                <div class="icon arrow-left"></div>
+                <div class="post-link">
+                    <a href="/2022/01/26/Spring/">Prev</a>
+                </div>
+            
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2022/01/16/RabbitMQ-%E4%BA%A4%E6%8D%A2%E6%9C%BA+%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97+%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97%E6%95%B4%E5%90%88SpringBoot/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+                Ye Yang | 
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://hexo.io/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+  </body>
+</html>

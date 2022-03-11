@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ch">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="yeung">
+
+
+
+
+
+
+
+<title>SpringBoot2-数据访问 | YE&#39;s BLOG</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+
+
+
+  <meta name="generator" content="Hexo 5.4.1"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">Ultralight Beam.</a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archives</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/about/">About</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/tag/">Tags</a>
+              </li> 
+                   
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/SpringBoot/">
+                            SpringBoot
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                SpringBoot2-数据访问
+            
+            
+        </div>
+        <span class="post-date">
+            11 20, 2021
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h1 id="SpringBoot-数据访问-SQL"><a href="#SpringBoot-数据访问-SQL" class="headerlink" title="SpringBoot 数据访问-SQL"></a>SpringBoot 数据访问-SQL</h1><h2 id="1-数据源的自动配置-HikariDataSource"><a href="#1-数据源的自动配置-HikariDataSource" class="headerlink" title="1.数据源的自动配置 - HikariDataSource"></a>1.数据源的自动配置 - HikariDataSource</h2><h3 id="1-1-导入JDBC场景"><a href="#1-1-导入JDBC场景" class="headerlink" title="1.1. 导入JDBC场景"></a>1.1. 导入JDBC场景</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-data-jdbc<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><img src="image.png" alt="image"></p>
+<p>HikariCP: 数据库连接池</p>
+<p>spring-jdbc: 进行jdbc操作的</p>
+<p>spring-tx: spring支持事务的</p>
+<p>再导入数据库驱动：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">默认版本：<span class="tag">&lt;<span class="name">mysql.version</span>&gt;</span>8.0.22<span class="tag">&lt;/<span class="name">mysql.version</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>mysql<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>mysql-connector-java<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">想要修改版本</span><br><span class="line">1、直接依赖引入具体版本（maven的就近依赖原则）</span><br><span class="line">2、重新声明版本（maven的属性的就近优先原则）</span><br><span class="line">    <span class="tag">&lt;<span class="name">properties</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">java.version</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">java.version</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">mysql.version</span>&gt;</span>5.1.49<span class="tag">&lt;/<span class="name">mysql.version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">properties</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-分析自动配置"><a href="#1-2-分析自动配置" class="headerlink" title="1.2. 分析自动配置"></a>1.2. 分析自动配置</h3><p>自动配置的类：</p>
+<ul>
+<li><p>DataSourceAutoConfiguration：数据源的自动配置</p>
+<ul>
+<li>修改数据源相关的配置：spring.datasource</li>
+<li>数据库连接池的配置，是容器中没有DataSource才自动配置的</li>
+<li>底层配置好的连接池是 HikariDataSource</li>
+</ul>
+</li>
+<li><p>DataSourceTransactionManagerAutoConfiguration：事务管理器的自动配置</p>
+</li>
+<li><p>JdbcTemplateAutoConfiguration：JdbcTemplate的自动配置，可以用来对数据库进行CRUD</p>
+<ul>
+<li>可以修改@ConfigurationProperties(prefix = “spring.jdbc”)这个配置项来修改JdbcTemplate</li>
+</ul>
+</li>
+<li><p>JndiDataSourceAutoConfiguration：jndi的自动配置</p>
+</li>
+<li><p>XADataSourceAutoConfiguration：分布式事务相关的</p>
+</li>
+</ul>
+<h3 id="1-3-修改配置项"><a href="#1-3-修改配置项" class="headerlink" title="1.3. 修改配置项"></a>1.3. 修改配置项</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">datasource:</span></span><br><span class="line">    <span class="attr">url:</span> <span class="string">jdbc:mysql:///db_account</span></span><br><span class="line">    <span class="attr">username:</span> <span class="string">root</span></span><br><span class="line">    <span class="attr">password:</span> <span class="number">123456</span></span><br><span class="line">    <span class="attr">driver-class-name:</span> <span class="string">com.mysql.jdbc.Driver</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="1-4-测试"><a href="#1-4-测试" class="headerlink" title="1.4. 测试"></a>1.4. 测试</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="meta">@SpringBootTest</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Boot05WebAdminApplicationTests</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    JdbcTemplate jdbcTemplate;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">contextLoads</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line"><span class="comment">//        jdbcTemplate.queryForObject(&quot;select * from account_tbl&quot;)</span></span><br><span class="line"><span class="comment">//        jdbcTemplate.queryForList(&quot;select * from account_tbl&quot;,)</span></span><br><span class="line">        <span class="type">Long</span> <span class="variable">aLong</span> <span class="operator">=</span> jdbcTemplate.queryForObject(<span class="string">&quot;select count(*) from account_tbl&quot;</span>, Long.class);</span><br><span class="line">        log.info(<span class="string">&quot;记录总数：&#123;&#125;&quot;</span>,aLong);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<hr>
+<h2 id="2-使用Druid数据源"><a href="#2-使用Druid数据源" class="headerlink" title="2.使用Druid数据源"></a>2.使用Druid数据源</h2><h3 id="2-1-引入druid-starter"><a href="#2-1-引入druid-starter" class="headerlink" title="2.1. 引入druid-starter"></a>2.1. 引入druid-starter</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.alibaba<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>druid-spring-boot-starter<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.1.17<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-分析自动配置"><a href="#2-2-分析自动配置" class="headerlink" title="2.2. 分析自动配置"></a>2.2. 分析自动配置</h3><ul>
+<li>配置绑定：spring.datasource.druid</li>
+<li>DruidSpringAopConfiguration.class：监控SpringBean的，配置项：<strong>spring.datasource.druid.aop-patterns</strong></li>
+<li>DruidStatViewServletConfiguration.class：监控页的功能，配置项：<strong>spring.datasource.druid.stat-view-servlet；默认开启</strong></li>
+<li>DruidWebStatFilterConfiguration.class：web监控。配置项：<strong>spring.datasource.druid.web-stat-filter；默认开启</strong></li>
+<li>DruidFilterConfiguration.class：所有Druid自己filter的配置：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">FILTER_STAT_PREFIX</span> <span class="operator">=</span> <span class="string">&quot;spring.datasource.druid.filter.stat&quot;</span>;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">FILTER_CONFIG_PREFIX</span> <span class="operator">=</span> <span class="string">&quot;spring.datasource.druid.filter.config&quot;</span>;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">FILTER_ENCODING_PREFIX</span> <span class="operator">=</span> <span class="string">&quot;spring.datasource.druid.filter.encoding&quot;</span>;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">FILTER_SLF4J_PREFIX</span> <span class="operator">=</span> <span class="string">&quot;spring.datasource.druid.filter.slf4j&quot;</span>;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">FILTER_LOG4J_PREFIX</span> <span class="operator">=</span> <span class="string">&quot;spring.datasource.druid.filter.log4j&quot;</span>;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">FILTER_LOG4J2_PREFIX</span> <span class="operator">=</span> <span class="string">&quot;spring.datasource.druid.filter.log4j2&quot;</span>;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">FILTER_COMMONS_LOG_PREFIX</span> <span class="operator">=</span> <span class="string">&quot;spring.datasource.druid.filter.commons-log&quot;</span>;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">FILTER_WALL_PREFIX</span> <span class="operator">=</span> <span class="string">&quot;spring.datasource.druid.filter.wall&quot;</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-3-配置示例"><a href="#2-3-配置示例" class="headerlink" title="2.3. 配置示例"></a>2.3. 配置示例</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">datasource:</span></span><br><span class="line">    <span class="attr">url:</span> <span class="string">jdbc:mysql://localhost:3306/db_account</span></span><br><span class="line">    <span class="attr">username:</span> <span class="string">root</span></span><br><span class="line">    <span class="attr">password:</span> <span class="number">123456</span></span><br><span class="line">    <span class="attr">driver-class-name:</span> <span class="string">com.mysql.jdbc.Driver</span></span><br><span class="line"></span><br><span class="line">    <span class="attr">druid:</span></span><br><span class="line">      <span class="attr">aop-patterns:</span> <span class="string">com.atguigu.admin.*</span>  <span class="comment">#监控SpringBean</span></span><br><span class="line">      <span class="attr">filters:</span> <span class="string">stat,wall</span>     <span class="comment"># 底层开启功能，stat（sql监控），wall（防火墙）</span></span><br><span class="line"></span><br><span class="line">      <span class="attr">stat-view-servlet:</span>   <span class="comment"># 配置监控页功能</span></span><br><span class="line">        <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">        <span class="attr">login-username:</span> <span class="string">admin</span></span><br><span class="line">        <span class="attr">login-password:</span> <span class="string">admin</span></span><br><span class="line">        <span class="attr">resetEnable:</span> <span class="literal">false</span></span><br><span class="line"></span><br><span class="line">      <span class="attr">web-stat-filter:</span>  <span class="comment"># 监控web</span></span><br><span class="line">        <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">        <span class="attr">urlPattern:</span> <span class="string">/*</span></span><br><span class="line">        <span class="attr">exclusions:</span> <span class="string">&#x27;*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*&#x27;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      <span class="attr">filter:</span></span><br><span class="line">        <span class="attr">stat:</span>    <span class="comment"># 对上面filters里面的stat的详细配置</span></span><br><span class="line">          <span class="attr">slow-sql-millis:</span> <span class="number">1000</span></span><br><span class="line">          <span class="attr">logSlowSql:</span> <span class="literal">true</span></span><br><span class="line">          <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">        <span class="attr">wall:</span></span><br><span class="line">          <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">          <span class="attr">config:</span></span><br><span class="line">            <span class="attr">drop-table-allow:</span> <span class="literal">false</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<hr>
+<h2 id="3-整合MyBatis操作"><a href="#3-整合MyBatis操作" class="headerlink" title="3.整合MyBatis操作"></a>3.整合MyBatis操作</h2><p>starter</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.mybatis.spring.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>mybatis-spring-boot-starter<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.1.4<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="image1.png" alt="image"></p>
+<h3 id="3-1-配置模式"><a href="#3-1-配置模式" class="headerlink" title="3.1. 配置模式"></a>3.1. 配置模式</h3><ul>
+<li>全局配置文件</li>
+<li>SqlSessionFactory：自动配置好了</li>
+<li>SqlSession：自动配置了SqlSessionTemplate，里面整合了SqlSession</li>
+<li>@Import(AutoConfiguredMapperScannerRegistrar.class);</li>
+<li>Mapper：只要我们写的操作MyBatis的接口标注了@Mapper，就会被自动扫描进来</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@EnableConfigurationProperties(MybatisProperties.class)</span> <span class="comment">// MyBatis配置项绑定类。</span></span><br><span class="line"><span class="meta">@AutoConfigureAfter(&#123; DataSourceAutoConfiguration.class, MybatisLanguageDriverAutoConfiguration.class &#125;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MybatisAutoConfiguration</span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@ConfigurationProperties(prefix = &quot;mybatis&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MybatisProperties</span></span><br></pre></td></tr></table></figure>
+
+<p>通过修改配置文件中 mybatis为前缀的参数修改配置</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 配置mybatis规则</span></span><br><span class="line"><span class="attr">mybatis:</span></span><br><span class="line">  <span class="attr">config-location:</span> <span class="string">classpath:mybatis/mybatis-config.xml</span>  <span class="comment">#全局配置文件位置</span></span><br><span class="line">  <span class="attr">mapper-locations:</span> <span class="string">classpath:mybatis/mapper/*.xml</span>  <span class="comment">#sql映射文件位置</span></span><br><span class="line">  </span><br><span class="line"><span class="string">Mapper接口---&gt;绑定Xml</span></span><br><span class="line"><span class="string">&lt;?xml</span> <span class="string">version=&quot;1.0&quot;</span> <span class="string">encoding=&quot;UTF-8&quot;</span> <span class="string">?&gt;</span></span><br><span class="line"><span class="string">&lt;!DOCTYPE</span> <span class="string">mapper</span></span><br><span class="line">        <span class="string">PUBLIC</span> <span class="string">&quot;-//mybatis.org//DTD Mapper 3.0//EN&quot;</span></span><br><span class="line">        <span class="string">&quot;http://mybatis.org/dtd/mybatis-3-mapper.dtd&quot;</span><span class="string">&gt;</span></span><br><span class="line"><span class="string">&lt;mapper</span> <span class="string">namespace=&quot;com.ye.admin.mapper.AccountMapper&quot;&gt;</span></span><br><span class="line"><span class="string">&lt;!--</span>    <span class="string">public</span> <span class="string">Account</span> <span class="string">getAcct(Long</span> <span class="string">id);</span> <span class="string">--&gt;</span></span><br><span class="line">    <span class="string">&lt;select</span> <span class="string">id=&quot;getAcct&quot;</span> <span class="string">resultType=&quot;com.ye.admin.bean.Account&quot;&gt;</span></span><br><span class="line">        <span class="string">select</span> <span class="string">*</span> <span class="string">from</span>  <span class="string">account_tbl</span> <span class="string">where</span>  <span class="string">id=#&#123;id&#125;</span></span><br><span class="line">    <span class="string">&lt;/select&gt;</span></span><br><span class="line"><span class="string">&lt;/mapper&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>配置private Configuration configuration; mybatis.configuration就相当于修改mybatis全局配置文件下的值</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 配置mybatis规则</span></span><br><span class="line"><span class="attr">mybatis:</span></span><br><span class="line"><span class="comment">#  config-location: classpath:mybatis/mybatis-config.xml</span></span><br><span class="line">  <span class="attr">mapper-locations:</span> <span class="string">classpath:mybatis/mapper/*.xml</span></span><br><span class="line">  <span class="attr">configuration:</span></span><br><span class="line">    <span class="attr">map-underscore-to-camel-case:</span> <span class="literal">true</span>  <span class="comment">#java是驼峰命名法，但sql不是</span></span><br><span class="line"> <span class="string">全局配置文件和mybatis:configuration冲突，只能写一个</span></span><br><span class="line"> <span class="string">可以不写全局配置文件，所有全局配置文件的配置都放在configuration配置项中即可</span></span><br></pre></td></tr></table></figure>
+
+<p>步骤总结：</p>
+<ul>
+<li>导入myBatis官方starter</li>
+<li>编写mapper接口，标注@Mapper注解</li>
+<li>编写sql映射文件并绑定mapper接口</li>
+<li>在application.yaml中指定Mapper配置文件的位置，以及指定全局配置文件的信息（但是建议用mybatis.configuration配置）</li>
+</ul>
+<hr>
+<h2 id="4-整合MyBatis-Plus完成CRUD"><a href="#4-整合MyBatis-Plus完成CRUD" class="headerlink" title="4.整合MyBatis-Plus完成CRUD"></a>4.整合MyBatis-Plus完成CRUD</h2><h3 id="4-1-MyBatis-Plus"><a href="#4-1-MyBatis-Plus" class="headerlink" title="4.1 MyBatis-Plus"></a>4.1 MyBatis-Plus</h3><p>MyBatis-Plus (MP)是MyBatis的增强工具，在MyBatis的基础上制作增强不做改变。</p>
+<p>官网：<a target="_blank" rel="noopener" href="https://baomidou.com/">https://baomidou.com/</a></p>
+<p>（安装MyBatisX插件）</p>
+<h3 id="4-2-整合MyBatis-Plus"><a href="#4-2-整合MyBatis-Plus" class="headerlink" title="4.2 整合MyBatis-Plus"></a>4.2 整合MyBatis-Plus</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.baomidou<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>mybatis-plus-boot-starter<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.4.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>自动配置</p>
+<ul>
+<li>MyBatisPlusAutoConfiguration配置类，MyBatisPlusProperties配置项绑定。mybatis-plus:xxx就是对mybatis-plus的定制</li>
+<li>SqlSessionFactory自动配置好。底层是容器中默认的数据源。</li>
+<li>mapperLocations自动配置好，有默认值：classpath※:/mapper/※※/※.xml;即任意包的类路径下的所有mapper文件夹下任意路径下的所有xml都是sql映射文件。建议以后sql映射文件放在mapper下。</li>
+<li>容器中自动配置好了SqlSessionTemplate。 </li>
+<li>@Mapper标注的接口也会被自动扫描。建议@MapperScan(“com.ye.admin.mapper”)批量扫描。</li>
+</ul>
+<p>优点：</p>
+<p>只要<strong>Mapper继承了BaseMapper接口</strong>就可以进行CRUD</p>
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+                <div class="icon arrow-left"></div>
+                <div class="post-link">
+                    <a href="/2021/11/23/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%AC%AC1%E7%AB%A0/">Prev</a>
+                </div>
+            
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2021/11/19/SpringBoot2-Web%E5%BC%80%E5%8F%91-%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86+%E5%8E%9F%E7%94%9F%E7%BB%84%E4%BB%B6%E6%B3%A8%E5%85%A5/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+                Ye Yang | 
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://hexo.io/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+  </body>
+</html>

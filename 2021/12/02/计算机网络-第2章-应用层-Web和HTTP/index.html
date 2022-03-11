@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ch">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="yeung">
+
+
+
+
+
+
+
+<title>计算机网络-第2章-应用层-Web和HTTP | YE&#39;s BLOG</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+
+
+
+  <meta name="generator" content="Hexo 5.4.1"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">Ultralight Beam.</a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archives</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/about/">About</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/tag/">Tags</a>
+              </li> 
+                   
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/">
+                            计算机网络
+                        </a>
+                    </span>    
+                
+                    <span class="post-tag">
+                        <a href="/tags/%E5%BA%94%E7%94%A8%E5%B1%82/">
+                            应用层
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                计算机网络-第2章-应用层-Web和HTTP
+            
+            
+        </div>
+        <span class="post-date">
+            12 02, 2021
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h1 id="计算机网络-第2章-应用层"><a href="#计算机网络-第2章-应用层" class="headerlink" title="计算机网络-第2章 应用层"></a>计算机网络-第2章 应用层</h1><h2 id="2-2-Web和HTTP"><a href="#2-2-Web和HTTP" class="headerlink" title="2.2 Web和HTTP"></a>2.2 Web和HTTP</h2><h3 id="2-2-1-HTTP概况"><a href="#2-2-1-HTTP概况" class="headerlink" title="2.2.1 HTTP概况"></a>2.2.1 HTTP概况</h3><p>Web的应用层协议是超文本传输协议（HyperText Transfer Protocol / HTTP），它是<strong>Web的核心</strong>。</p>
+<p>HTTP由两个程序实现：一个<strong>客户程序</strong>和一个<strong>服务器程序</strong>。它们运行在不同的端系统中，通过交换<strong>HTTP报文</strong>进行会话。</p>
+<p>HTTP定义了这些报文的结构以及客户和服务器进行报文交换的方式。</p>
+<p>HTTP使用<strong>TCP作为它的支撑运输协议</strong>。HTTP客户首先发起一个与服务器的TCP连接。一旦连接建立，该浏览器和服务器进程就可以通过套接字接口访问TCP。客户向它的套接字接口发送HTTP请求报文，并从套接字接口接收HTTP响应报文。</p>
+<p>TCP为HTTP提供可靠数据传输服务。</p>
+<p>*服务器向客户发送被请求的文件，而<strong>不存储</strong>任何关于该客户的<strong>状态信息</strong>。假如某个特定的客户在短短几秒内两次请求同一个对象，服务器不会因为刚刚为该客户提供了该对象就不再做出反应，而是<strong>重新发送</strong>该对象。所以说HTTP是一个<strong>无状态协议</strong>（stateless protocol）</p>
+<h3 id="2-2-2-非持续连接和持续连接"><a href="#2-2-2-非持续连接和持续连接" class="headerlink" title="2.2.2 非持续连接和持续连接"></a>2.2.2 非持续连接和持续连接</h3><ul>
+<li>非持续连接：当客户 - 服务器的交互是经过TCP进行时，每个请求/响应对是经一个<strong>单独</strong>的TCP连接发送。</li>
+<li>持续连接：当客户 - 服务器的交互是经过TCP进行时，所有的请求及其响应经<strong>相同</strong>的TCP连接发送。</li>
+</ul>
+<p>HTTP默认方式是<strong>持续连接</strong>。</p>
+<h4 id="2-2-2-1-采用非持续连接的HTTP"><a href="#2-2-2-1-采用非持续连接的HTTP" class="headerlink" title="2.2.2.1 采用非持续连接的HTTP"></a>2.2.2.1 采用非持续连接的HTTP</h4><p>在非持续连接的情况下，从服务器向客户传送一个Web页面（该页面含有一个HTML基本文件和10个JPEG图形）的步骤：</p>
+<p>假设该HTML文件的URL为：<a target="_blank" rel="noopener" href="http://www.someschool.edu/someDepartment/home.index">http://www.someSchool.edu/someDepartment/home.index</a></p>
+<p>1.HTTP客户进程在端口号80发起一个到服务器  <a target="_blank" rel="noopener" href="http://www.someschool.edu/">www.someSchool.edu</a>  的TCP连接</p>
+<p>2.HTTP客户经它的套接字向服务器发送一个HTTP请求报文。请求报文包含了路径名/someDepartment/home.index</p>
+<p>3.HTTP服务器进程经它的套接字接收该请求报文，从其存储器检索出对象 <a target="_blank" rel="noopener" href="http://www.someschool.edu/someDepartment/home.index">www.someSchool.edu/someDepartment/home.index</a>  ，在一个HTTP响应报文封装对象，并通过其套接字向客户发送响应报文</p>
+<p>4.HTTP服务器进程通知TCP断开该连接</p>
+<p>5.HTTP客户接收响应报文，TCP连接关闭，客户从响应报文中提取出该文件，检查该HTML文件，得到对10个JPEG图形的引用</p>
+<p>6.对每个引用的JPEG图形对象重复前4个步骤</p>
+<p>其中每个TCP连接在服务器发送一个对象后关闭，即该连接并不为其他的对象而持续下来，每个TCP连接只传输一个请求报文和一个响应报文。</p>
+<p>简单估算一下从客户请求HTML基本文件到该客户收到整个文件为止所花费的时间。为此，给出<strong>往返时间（Round-Trip Time / RTT）</strong>的定义，该时间指一个<strong>短分组从客户到服务器然后再返回客户所花费的时间</strong>。RTT包括分组传播时延、排队时延以及处理时延。</p>
+<p>现在考虑当用户点击超链接时：浏览器在它和Web服务器之间发起一个TCP连接，这涉及一次“三次握手”过程，即客户向服务器发送一个小TCP报文段，服务器用一个小TCP报文段做出确认和响应，最后客户向服务器返回确认。三次握手中前两个部分所耗费的时间占用了一个RTT。完成前两个部分之后，客户结合三次握手的第三部分，向该TCP连接发送一个HTTP请求报文，一旦该请求报文到达服务器，服务器就在该TCP连接上发送HTML文件。该HTTP请求/响应用去了另一个RTT，因此，<strong>总的响应时间就是两个RTT加上服务器传输HTML文件的时间。</strong></p>
+<h4 id="2-2-2-2-采用持续连接的HTTP"><a href="#2-2-2-2-采用持续连接的HTTP" class="headerlink" title="2.2.2.2 采用持续连接的HTTP"></a>2.2.2.2 采用持续连接的HTTP</h4><p>非持续连接有一些缺点：</p>
+<p>1.必须为每一个请求的对象建立和维护一个全新的连接。这给Web服务器带来了严重的负担。</p>
+<p>2.每一个对象经受两倍RTT的交付时延，即一个RTT用于创建TCP，另一个RTT用于请求和接收一个对象。</p>
+<p>在采用持续连接的情况下，服务器在发送响应后保持该TCP连接打开，在相同的客户与服务器之间，后续的请求和响应报文能够通过相同的连接进行传送。一般来说，如果一条连接经过一定时间间隔仍未被使用，HTTP服务器就关闭该连接。</p>
+<p><strong>HTTP的默认模式是使用带流水线的持续连接。</strong></p>
+<h3 id="2-2-3-HTTP报文格式"><a href="#2-2-3-HTTP报文格式" class="headerlink" title="2.2.3 HTTP报文格式"></a>2.2.3 HTTP报文格式</h3><p>HTTP报文有两种：请求报文和响应报文。</p>
+<h4 id="2-2-3-1-HTTP请求报文"><a href="#2-2-3-1-HTTP请求报文" class="headerlink" title="2.2.3.1 HTTP请求报文"></a>2.2.3.1 HTTP请求报文</h4><p>例如：</p>
+<p>GET /somedir/page.html HTTP/1.1</p>
+<p>Host: <a target="_blank" rel="noopener" href="http://www.someschool.edu/">www.someschool.edu</a></p>
+<p>Connection: close</p>
+<p>User-agent: Mozilla/5.0</p>
+<p>Accept-language: fr</p>
+<p>HTTP请求报文的第一行叫请求行，其后继的行叫做首部行。</p>
+<p>请求行有3个字段：方法字段、URL字段和HTTP字段</p>
+<p>首部行中，Host：指明了对象所在的主机；Connection: close 告诉服务器不要使用持续连接，要求服务器发送完对象后就关闭这条连接；User-agent：指明用户代理。</p>
+<p>使用POST方法时，还会有实体体，用户提交表单时，HTTP客户常使用POST方法。实体体中包含的就是用户在表单字段中的输入值。</p>
+<h4 id="2-2-3-2-HTTP响应报文"><a href="#2-2-3-2-HTTP响应报文" class="headerlink" title="2.2.3.2 HTTP响应报文"></a>2.2.3.2 HTTP响应报文</h4><p>例如：</p>
+<p>HTTP/1.1 200 OK</p>
+<p>Connection: close</p>
+<p>Date: Tue, 18 Aug 2015 15:44:04 GMT</p>
+<p>Server: Apache/ 2.2.3</p>
+<p>Last-Modified: Tue, 18 Aug 2015 15:11:04 GMT</p>
+<p>Content-Length: 6821</p>
+<p>Connection-Type: text/html</p>
+<p>(data data data … )</p>
+<p>响应报文有三个部分：初始状态行、首部行、实体体。实体体是报文的主要部分。状态行有3个字段：协议版本字段、状态码和相应状态信息。</p>
+<p>Date：首部行指示服务器产生并发送该响应报文的日期和时间。这个时间是服务器从它的文件系统中检索到该对象，将该对象插入响应报文，并发送该响应报文的时间。</p>
+<p>Last-Modified：首部行指示了对象创建或最后修改的日期和时间。</p>
+<h3 id="2-2-4-用户和服务器的交互：cookie"><a href="#2-2-4-用户和服务器的交互：cookie" class="headerlink" title="2.2.4 用户和服务器的交互：cookie"></a>2.2.4 用户和服务器的交互：cookie</h3><p>由于HTTP服务器是无状态的，然而Web站点通常希望能够识别用户，为此HTTP使用了cookie，它允许站点对用户进行跟踪。</p>
+<p>cookie技术有4个组件：</p>
+<ul>
+<li>在HTTP响应报文中的一个cookie首部行</li>
+<li>在HTTP请求报文中的一个cookie首部行</li>
+<li>在用户端系统中保留有一个cookie文件，并由用户的浏览器进行管理</li>
+<li>位于Web站点的一个后端数据库</li>
+</ul>
+<h3 id="2-2-5-Web缓存"><a href="#2-2-5-Web缓存" class="headerlink" title="2.2.5 Web缓存"></a>2.2.5 Web缓存</h3><p>Web缓存器（Web Cache）也叫代理服务器（proxy server），它是能够代表初始Web服务器来满足HTTP请求的网络实体。可以配置用户的浏览器，使得用户的所有HTTP请求首先指向Web缓存器，一旦某浏览器被配置，每个对某对象的浏览器请求首先被定向到该Web缓存器。</p>
+<p>假设浏览器正在请求对象<a target="_blank" rel="noopener" href="http://www.someschool.edu/campus.gif">http://www.someSchool.edu/campus.gif</a> ：</p>
+<p>1.浏览器创建一个到Web缓存器的TCP连接，并向Web缓存器中的对象发送一个HTTP请求</p>
+<p>2.Web缓存器进行检查，看看本地是否存储了该对象副本。如果有，Web缓存器就向客户浏览器用HTTP响应报文返回该对象</p>
+<p>3.如果Web缓存器中没有该对象，它就打开一个与该对象的初始服务器的TCP连接。Web缓存器在这个TCP连接上发送一个对该对象的HTTP请求。在收到该请求后，初始服务器向Web缓存器发送具有该对象的HTTP响应</p>
+<p>4.Web缓存器接收到该对象时，它在本地存储空间存储一份副本，并向客户的浏览器用HTTP响应报文发送该副本。</p>
+<p><strong>Web缓存器既是服务器又是客户。</strong></p>
+<p>在因特网上部署Web缓存器有两个原因：Web缓存器可以大大减少对客户请求的响应时间；Web缓存器可以大大减少一个机构的接入链路到因特网的通信量，通过减少通信量，机构就不必急于增加带宽，因此降低了费用。</p>
+<h4 id="2-2-6-条件GET方法"><a href="#2-2-6-条件GET方法" class="headerlink" title="2.2.6 条件GET方法"></a>2.2.6 条件GET方法</h4><p>尽管高速缓存能减少用户感受到的响应时间，但也有了新的问题：放在缓存器中的对象可能是旧版本的。</p>
+<p>条件GET方法可以解决这个问题。</p>
+<p>如果：1.请求报文使用GET方法；2.请求报文中包含一个“If-Modified-Since: ”首部行，那么这个HTTP请求报文就是一个条件GET请求报文。 </p>
+<p>如果缓存器中就是最新版本的对象，作为对条件GET方法的响应，Web服务器仍发送一个响应报文，但并没有在响应报文中包含所请求的对象。而是在状态行标注304 Not Modified，告诉缓存器可以使用该对象，能向请求的浏览器转发该代理缓存器缓存的该对象副本。</p>
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+                <div class="icon arrow-left"></div>
+                <div class="post-link">
+                    <a href="/2021/12/05/SpringBoot2-%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95/">Prev</a>
+                </div>
+            
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2021/12/01/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%AC%AC2%E7%AB%A0-%E5%BA%94%E7%94%A8%E5%B1%82-%E5%BA%94%E7%94%A8%E5%B1%82%E5%8D%8F%E8%AE%AE%E5%8E%9F%E7%90%86/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+                Ye Yang | 
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://hexo.io/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+  </body>
+</html>

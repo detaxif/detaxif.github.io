@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ch">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="yeung">
+
+
+
+
+
+
+
+<title>计算机网络-第1章 | YE&#39;s BLOG</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+
+
+
+  <meta name="generator" content="Hexo 5.4.1"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">Ultralight Beam.</a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archives</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/about/">About</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/tag/">Tags</a>
+              </li> 
+                   
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/">
+                            计算机网络
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                计算机网络-第1章
+            
+            
+        </div>
+        <span class="post-date">
+            11 23, 2021
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h1 id="计算机网络-第1章-计算机网络和因特网"><a href="#计算机网络-第1章-计算机网络和因特网" class="headerlink" title="计算机网络-第1章 计算机网络和因特网"></a>计算机网络-第1章 计算机网络和因特网</h1><h2 id="1-1-什么是因特网"><a href="#1-1-什么是因特网" class="headerlink" title="1.1 什么是因特网"></a>1.1 什么是因特网</h2><p>回答这个问题有两种方式：其一，描述因特网的具体构成，即构成因特网的<strong>基本硬件</strong>和<strong>软件组件</strong>；其二，根据为分布式应用提供服务的联网基础设施来描述因特网。</p>
+<h3 id="1-1-1-具体构成描述"><a href="#1-1-1-具体构成描述" class="headerlink" title="1.1.1 具体构成描述"></a>1.1.1 具体构成描述</h3><p>首先，PC、手机、游戏机等联网的设备被称为<strong>主机</strong>（host）或<strong>端系统</strong>（end system）。端系统通过<strong>通信链路</strong>和<strong>分组交换机</strong>连接到一起。不同的链路能够以不同的速率传输数据，链路的<strong>传输速率</strong>以bit/s（bps）度量。</p>
+<p>当今因特网中，两种最著名的分组交换机是<strong>路由器</strong>和<strong>链路层交换机</strong>。前者通常用于网络核心中，后者通常用于接入网中。</p>
+<p>从发送端系统到接收端系统，一个分组所经历的一系列通信链路和分组交换机称为通过该网络的<strong>路径</strong>（route或path）。</p>
+<p>端系统通过<strong>因特网服务提供商</strong>（Internet Service Provider, ISP）接入因特网。每个ISP自身就是一个由多台分组交换机和多端通信链路组成的网络。</p>
+<h3 id="1-1-2-服务描述"><a href="#1-1-2-服务描述" class="headerlink" title="1.1.2 服务描述"></a>1.1.2 服务描述</h3><p>分布式应用程序：涉及多个相互交换数据的端系统的应用程序被称为分布式应用程序。</p>
+<p>与因特网相连的端系统提供一个<strong>套接字接口</strong>（socket interface），该接口规定了运行在一个端系统上的程序请求因特网基础设施向运行在另一个端系统上的特定目的地程序交付数据的方式。因特网套接字接口是一套发送程序必须遵循的规则集合，因此因特网能够将数据交付给目的地。</p>
+<hr>
+<h2 id="1-2-网络边缘"><a href="#1-2-网络边缘" class="headerlink" title="1.2 网络边缘"></a>1.2 网络边缘</h2><p>我们把与因特网相连的计算机和其他设备称为端系统，因为它们位于因特网的边缘。</p>
+<p>端系统也称为主机，有时又被进一步划分为两类：客户（client）和服务器（server）。</p>
+<h3 id="1-2-1-接入网"><a href="#1-2-1-接入网" class="headerlink" title="1.2.1 接入网"></a>1.2.1 接入网</h3><p>接入网是指将端系统物理连接到其边缘路由器的网络。边缘路由器是端系统到任何其他远程端系统的路径上的第一台路由器。</p>
+<p>接入网又有几种使用环境：</p>
+<ul>
+<li>家庭接入：DSL、电缆、FTTH、拨号和卫星</li>
+</ul>
+<p>宽带入宅接入有两种最流行的类型：数字用户线（Digital Subscriber Line, DSL）和电缆。</p>
+<p>DSL标准定义的上行速率和下行速率是不同的，所以这种接入被称为是<strong>不对称</strong>的。</p>
+<p>电缆因特网接入需要特殊的调制解调器，被称为<strong>电缆调制解调器</strong>（cable modem）。</p>
+<p>电缆调制解调器端接系统（Cable Modem Termination System, CMTS）和DSL一样，接入通常是不对称的。</p>
+<p>电缆因特网接入的一个重要特征是<strong>共享广播媒体</strong>。即如果几个用户同时经下行信道下载一个视频文件，每个用户接收文件的实际速率将大大低于电缆总计的下行速率。</p>
+<p>FTTH（Fiber To The Home）光纤到户则是更高速率的技术。</p>
+<ul>
+<li>企业和家庭接入：以太网和WIFI</li>
+<li>广域无线接入：4G</li>
+</ul>
+<h3 id="1-2-2-物理媒体"><a href="#1-2-2-物理媒体" class="headerlink" title="1.2.2 物理媒体"></a>1.2.2 物理媒体</h3><p>物理媒体分为<strong>导引型媒体</strong>和<strong>非导引型媒体</strong></p>
+<ul>
+<li>双绞铜线：所能达到的数据传输速率取决于线的粗细以及传输方和接收方之间的距离</li>
+<li>同轴电缆：被用作导引型共享媒体</li>
+<li>光纤</li>
+<li>陆地无线电信道</li>
+<li>卫星无线电信道</li>
+</ul>
+<hr>
+<h2 id="1-3-网络核心"><a href="#1-3-网络核心" class="headerlink" title="1.3 网络核心"></a>1.3 网络核心</h2><p>网络核心：由互联因特网<strong>端系统</strong>的<strong>分组交换机</strong>和<strong>链路</strong>构成的网状网络</p>
+<h3 id="1-3-1-分组交换"><a href="#1-3-1-分组交换" class="headerlink" title="1.3.1 分组交换"></a>1.3.1 分组交换</h3><p>为了从源端系统向目的端系统发送报文，源将长报文划分为较小的数据块，称之为<strong>分组</strong>。</p>
+<h4 id="1-3-1-1-存储转发传输"><a href="#1-3-1-1-存储转发传输" class="headerlink" title="1.3.1.1 存储转发传输"></a>1.3.1.1 存储转发传输</h4><p>多数分组交换机在链路的输入端使用存储转发传输机制。</p>
+<p>即在交换机能够开始向输出链路传输该分组的第一个比特之前，必须接收到整个分组。</p>
+<p>即就算分组的前沿达到了路由器，路由器也不能传输已经接收的比特，必须先缓存（存储），仅当路由器已经接收完了该分组的所有比特后，才能开始向出链路传输该分组。</p>
+<p>所以：通过由N条速率均为R的链路组成的路径，端到端的时延是：d端到端 = N * L / R</p>
+<h4 id="1-3-1-2-排队时延和分组丢失"><a href="#1-3-1-2-排队时延和分组丢失" class="headerlink" title="1.3.1.2 排队时延和分组丢失"></a>1.3.1.2 排队时延和分组丢失</h4><p>对于每条相连的链路，该分组交换机具有一个输出缓存（输出队列）用于存储路由器准备发往那条链路的分组。</p>
+<p>如果到达的分组需要被传输，但发现该链路再传输其他分组，那么该分组就需要在输出缓存中等待。</p>
+<p>因此，除了存储转发时延外，分组还要承受<strong>排队时延</strong>。</p>
+<p>由于缓存空间的大小是有限的，如果到达的分组发现缓存已经被充满了，就会出现<strong>分组丢失（丢包 , packet loss）</strong>。</p>
+<h3 id="1-3-2-电路交换"><a href="#1-3-2-电路交换" class="headerlink" title="1.3.2 电路交换"></a>1.3.2 电路交换</h3><p>在电路交换网络中，在端系统间通信会话期间，<strong>预留</strong>了端系统间沿路径通信所需要的资源（缓存，链路传输速率），而在分组交换网络中这些资源是不预留的。</p>
+<h4 id="1-3-2-1-电路交换网络中的复用"><a href="#1-3-2-1-电路交换网络中的复用" class="headerlink" title="1.3.2.1 电路交换网络中的复用"></a>1.3.2.1 电路交换网络中的复用</h4><ul>
+<li>频分复用 Frequency-Division Multiplexing / FDM： 链路的频谱由跨越链路创建的所有连接共享</li>
+<li>时分复用 Time-Division Multiplexing / TDM： 时间被划分为固定期间的帧，每个帧又被划分为固定数量的时隙。对于TDM，一条电路的<strong>传输速率 = 帧速率 * 一个时隙中的比特数量</strong>。例如：如果链路每秒传输8000个帧，每个时隙由8个比特组成，则传输速率是64kbps。</li>
+</ul>
+<h4 id="1-3-2-2-分组交换与电路交换的对比"><a href="#1-3-2-2-分组交换与电路交换的对比" class="headerlink" title="1.3.2.2 分组交换与电路交换的对比"></a>1.3.2.2 分组交换与电路交换的对比</h4><p>分组交换的性能能够<strong>优于</strong>电路交换的性能。因为电路交换<strong>不考虑需求</strong>，而<strong>预先分配</strong>了传输链路的使用，这导致已分配而并不需要的链路时间未被利用。而分组交换<strong>按需分配</strong>链路使用，链路传输能力将在所有需要在链路上传输分组的用户之间逐分组地被共享。</p>
+<h3 id="1-3-3-网络的网络"><a href="#1-3-3-网络的网络" class="headerlink" title="1.3.3 网络的网络"></a>1.3.3 网络的网络</h3><p>多宿：ISP可以与两个或更多ISP连接</p>
+<p>对等：可以直接将位于相同等级结构层次的邻近一对ISP的网络连到一起，使它们之间的流量经直接连接而不是通过上游的中间ISP传输</p>
+<p>网络结构：接入ISP –&gt; 区域ISP –&gt; 第一层ISP ，中国：接入ISP –&gt; 省级ISP –&gt; 国家级ISP –&gt; 第一层ISP</p>
+<p>现今的互联网是网络结构5，是在网络结构4（接入ISP、区域ISP、第一层ISP、PoP、多宿、对等、IXP组成）的顶部增加内容提供商网络（如Google）构建而成。</p>
+<p>总结：今天的因特网是一个网络的网络，由十多个第一层ISP和数十万个较低层ISP组成，较低层的ISP和较高层的ISP相连，较高层ISP彼此互联。</p>
+<hr>
+<h2 id="1-4-分组交换网中的时延、丢包和吞吐量"><a href="#1-4-分组交换网中的时延、丢包和吞吐量" class="headerlink" title="1.4 分组交换网中的时延、丢包和吞吐量"></a>1.4 分组交换网中的时延、丢包和吞吐量</h2><p>计算机网络必定要限制在端系统之间的吞吐量（每秒能够传送的数据量）</p>
+<h3 id="1-4-1-时延"><a href="#1-4-1-时延" class="headerlink" title="1.4.1 时延"></a>1.4.1 时延</h3><p>节点处理时延、排队时延、传输时延、传播时延累加起来就是节点总时延</p>
+<ul>
+<li><strong>处理时延</strong>：检查分组首部和决定将该分组导向何处所需要的时间是处理时延的一部分，还有其他例如检查比特级别的差错所需的时间也是处理时延的一部分</li>
+<li><strong>排队时延</strong>：在队列中，分组在链路上等待传输的时间</li>
+<li><strong>传输时延</strong>：用L 比特表示该分组的长度，R bps表示从路由器A到路由器B的链路传输速率，那么传输时延就是 L / R</li>
+<li><strong>传播时延</strong>：一个比特从链路的起点到路由器所需的时间就是传播时延，传播速率取决于该链路的物理媒体，传播时延等于两台路由器之间的距离除以传播速率</li>
+<li><strong>传输时延和传播时延的比较</strong>：传输时延是路由器推出分组所需要的时间，是分组长度和链路传输速率的函数，与两台路由器之间的距离无关。传播时延是一个比特从一台路由器到另一台路由器所需要的时间，是两台路由器之间距离的函数，与分组长度或链路传输速率无关。</li>
+</ul>
+<p>节点的总时延 dntotal = dproc + dqueue + dtrans + dprop</p>
+<h3 id="1-4-2-排队时延和丢包"><a href="#1-4-2-排队时延和丢包" class="headerlink" title="1.4.2 排队时延和丢包"></a>1.4.2 排队时延和丢包</h3><p>什么时候排队时延大，什么时候不大？这取决于流量到达该队列的速率、链路的传输速率和到达流量的性质（即流量是周期性到达还是突发形式到达）。</p>
+<p>令 a 表示分组到达队列的平均速率 （单位是分组/秒，即pkt / s）</p>
+<p>R 表示传输速率，即从队列中推出比特的速率（单位是bps）</p>
+<p>假定所有分组都由 L 比特组成</p>
+<p>则比特到达队列的平均速率是 La bps</p>
+<p>最后，假定队列非常大，能容纳无限数量的比特，则称比率 La/R为<strong>流量强度</strong></p>
+<p>如果流量强度 <strong>La/R &gt;1</strong>，则比特<strong>到达队列</strong>的平均速率<strong>超过</strong>从该队列<strong>传输出去</strong>的速率，那么<strong>队列趋向于无限增加，排队时延趋向无穷大。</strong></p>
+<p><strong>La/R &lt;= 1</strong>时，到达流量的性质就会影响排队时延。例如，如果分组<strong>周期性到达</strong>，即每L/R秒到达一个分组，则每个分组将到达一个空队列中，<strong>不会有排队时延</strong>。如果分组以<strong>突发形式</strong>到达，则可能会有很大的平均排队时延。例如，假定每(L/R)*N秒同时到达N个分组，组第一个分组没有排队时延，第二个分组就有L/R秒的时延，第n个分组具有 <strong>(n-1)L/R</strong> 秒的时延。</p>
+<p>随着流量强度接近于1，平均排队时延迅速增加。</p>
+<p>在上述讨论中，是以队列能容纳无穷多的分组为前提的，在现实中，队列只有有限的容量。因此随着流量强度接近于1，<strong>排队时延并不真正趋向无穷大</strong>，相反，到达的分组将发现一个满的队列，路由器将丢弃这个分组，即<strong>丢失（lost）</strong>。分组丢失的比例随着流量强度增加而增加。</p>
+<h3 id="1-4-3-端到端时延"><a href="#1-4-3-端到端时延" class="headerlink" title="1.4.3 端到端时延"></a>1.4.3 端到端时延</h3><p>假定在源主机和目标主机之间有N-1台路由器，每台路由器和源主机上的处理时延时dproc，每台路由器和源主机的输出速率是Rbps，每条链路的传播时延是dprop，那么端到端时延 dend-end = N (dproc + dtrans + dprop)</p>
+<h3 id="1-4-4-计算机网络中的吞吐量"><a href="#1-4-4-计算机网络中的吞吐量" class="headerlink" title="1.4.4 计算机网络中的吞吐量"></a>1.4.4 计算机网络中的吞吐量</h3><p>如主机A向主机B传送一个文件，在任何时间瞬间的瞬时吞吐量是主机B接收到该文件的速率。如果文件由F比特组成，主机B接收所有F比特用去T秒，则平均吞吐量为 F/T bps</p>
+<p>现假定有服务器和客户端两个端系统，由两条通信链路和一台路由器相连，考虑从服务器传送一个文件到客户的吞吐量。Rs表示服务器与路由器之间的链路速率，Rc表示路由器与客户之间的链路速率。</p>
+<p>服务器 —–Rs—–&gt; 路由器 —–Rc—–&gt;客户</p>
+<ul>
+<li>如果Rs &lt; Rc：服务器注入的比特可以顺畅流动，以Rs到达客户</li>
+<li>如果Rs &gt; Rc：路由器不能像接收速率那么快转发，比特将以速率Rc离开路由器，得到端到端吞吐量为Rc</li>
+</ul>
+<p>得到：从服务器到客户传输一个F比特的大文件，简单的两链路传输文件所需时间：F / min{Rc, Rs}。即当没有其他干扰流量时，其吞吐量能够近似为沿着源和目的地之间路径的最小传输速率。</p>
+<hr>
+<h2 id="1-5-协议层次及其服务模型"><a href="#1-5-协议层次及其服务模型" class="headerlink" title="1.5 协议层次及其服务模型"></a>1.5 协议层次及其服务模型</h2><h3 id="1-5-1-分层的体系结构"><a href="#1-5-1-分层的体系结构" class="headerlink" title="1.5.1 分层的体系结构"></a>1.5.1 分层的体系结构</h3><p>应用层 – 运输层 – 网络层 – 链路层 – 物理层</p>
+<ul>
+<li>应用层的信息分组 – 报文</li>
+<li>运输层的信息分组 – 报文段</li>
+<li>网络层的信息分组 – 数据报</li>
+<li>链路层的信息分组 – 帧</li>
+</ul>
+<h3 id="1-5-2-封装"><a href="#1-5-2-封装" class="headerlink" title="1.5.2 封装"></a>1.5.2 封装</h3><p>封装：在每一层，一个分组具有两种类型的字段：<strong>首部字段和有效载荷字段</strong>。有效载荷通常是来自上一层的分组。</p>
+<p>如：在发送主机端，一个应用层报文被传送给运输层，运输层收取到报文并附上附加信息，该首部将被接收端的运输层使用。应用层报文和运输层首部信息一道构成了运输层报文段，运输层报文段因此封装了应用层报文。</p>
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+                <div class="icon arrow-left"></div>
+                <div class="post-link">
+                    <a href="/2021/12/01/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%AC%AC2%E7%AB%A0-%E5%BA%94%E7%94%A8%E5%B1%82-%E5%BA%94%E7%94%A8%E5%B1%82%E5%8D%8F%E8%AE%AE%E5%8E%9F%E7%90%86/">Prev</a>
+                </div>
+            
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2021/11/20/SpringBoot2-%E6%95%B0%E6%8D%AE%E8%AE%BF%E9%97%AE/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+                Ye Yang | 
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://hexo.io/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+  </body>
+</html>
