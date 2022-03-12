@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ch">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="yeung">
+
+
+
+
+
+
+
+<title>设计模式-结构型模式-装饰+外观+享元 | YE&#39;s BLOG</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+
+
+
+  <meta name="generator" content="Hexo 5.4.1"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">Ultralight Beam.</a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archives</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/about/">About</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/tag/">Tags</a>
+              </li> 
+                   
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">
+                            设计模式
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                设计模式-结构型模式-装饰+外观+享元
+            
+            
+        </div>
+        <span class="post-date">
+            03 12, 2022
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h1 id="设计模式"><a href="#设计模式" class="headerlink" title="设计模式"></a>设计模式</h1><h2 id="结构型模式"><a href="#结构型模式" class="headerlink" title="结构型模式"></a>结构型模式</h2><h3 id="Decorator-装饰者模式"><a href="#Decorator-装饰者模式" class="headerlink" title="Decorator 装饰者模式"></a>Decorator 装饰者模式</h3><p>意图：在不改变现有对象结构的情况下，动态地给一个对象添加一些额外的职责（即增加额外的功能）。</p>
+<p>以快餐店为例：</p>
+<p>快餐店有炒饭、炒面、炒河粉，可以额外加鸡蛋、培根，加配菜要额外加钱。</p>
+<p>如果用继承的方式实现：</p>
+<p><img src="img.png" alt="img"></p>
+<p>这样会存在扩展性不好的问题，如果要再加一种配料，或者加一种新的快餐，都需要新增大量的子类。</p>
+<p>用装饰者模式改进：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//抽象构件Component角色：快餐类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">class</span> <span class="title class_">FastFood</span>&#123;</span><br><span class="line">  <span class="keyword">private</span> <span class="type">float</span> price;<span class="comment">//价格</span></span><br><span class="line">  <span class="keyword">private</span> String desc;<span class="comment">//描述</span></span><br><span class="line">  <span class="comment">//无参有参 get set 方法</span></span><br><span class="line">  </span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">abstract</span> <span class="type">float</span> <span class="title function_">cost</span><span class="params">()</span>;<span class="comment">//计算总价</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//具体构件角色：炒饭、炒面</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">FriedRice</span> <span class="keyword">extends</span> <span class="title class_">FastFood</span>&#123;</span><br><span class="line">  <span class="keyword">public</span> <span class="title function_">FriedRice</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="built_in">super</span>(<span class="number">10</span>,<span class="string">&quot;炒饭&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">public</span> <span class="type">float</span> <span class="title function_">cost</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> getPrice();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">FriedNoodles</span> <span class="keyword">extends</span> <span class="title class_">FastFood</span>&#123;</span><br><span class="line">  <span class="keyword">public</span> <span class="title function_">FriedNoodles</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="built_in">super</span>(<span class="number">12</span>,<span class="string">&quot;炒面&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">public</span> <span class="type">float</span> <span class="title function_">cost</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> getPrice();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//抽象装饰者Decorator角色：装饰者类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">class</span> <span class="title class_">Garnish</span> <span class="keyword">extends</span> <span class="title class_">FastFood</span>&#123;</span><br><span class="line">  <span class="comment">//声明快餐类的变量</span></span><br><span class="line">  <span class="keyword">private</span> FastFood fastFood;</span><br><span class="line">  <span class="comment">//get set 有参构造方法</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//具体的装饰者：鸡蛋类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Egg</span> <span class="keyword">extends</span> <span class="title class_">Garnish</span>&#123;</span><br><span class="line">  <span class="keyword">public</span> <span class="title function_">Egg</span><span class="params">(FastFood fastFood)</span>&#123;</span><br><span class="line">    <span class="built_in">super</span>(fastFood,<span class="number">1</span>,<span class="string">&quot;鸡蛋&quot;</span>);<span class="comment">//鸡蛋的价格</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">public</span> <span class="type">float</span> <span class="title function_">cost</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> getPrice() + getFastFood().getPrice();</span><br><span class="line">    <span class="comment">//鸡蛋的价格+炒面/炒饭的价格</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="keyword">public</span> String <span class="title function_">getDesc</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">super</span>.getDesc() + getFastFood().getDesc();</span><br><span class="line">    <span class="comment">//字符串拼接：鸡蛋 + 炒面/炒饭</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//培根类同理</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Client</span>&#123;</span><br><span class="line">  psvm&#123;</span><br><span class="line">    <span class="comment">//点一份炒饭</span></span><br><span class="line">    <span class="type">FastFood</span> <span class="variable">food</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FriedRice</span>();</span><br><span class="line">    food.getDesc()+<span class="string">&quot; &quot;</span>+food.getPrice()+<span class="string">&quot;元&quot;</span>.sout;</span><br><span class="line">    <span class="comment">//输出：炒饭 10.0元</span></span><br><span class="line">    <span class="comment">//炒饭加一个鸡蛋</span></span><br><span class="line">    food = <span class="keyword">new</span> <span class="title class_">Egg</span>(food);</span><br><span class="line">    food.getDesc()+<span class="string">&quot; &quot;</span>+food.getPrice()+<span class="string">&quot;元&quot;</span>.sout;</span><br><span class="line">    <span class="comment">//输出：鸡蛋炒饭 11.0元</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>装饰者类优点：</p>
+<ul>
+<li>可以带来比继承更加灵活的扩展功能，遵循开闭原则。继承是静态的附加责任，装饰者则是动态的附加责任。</li>
+<li>装饰类和被装饰类可以独立发展，不会互相耦合。</li>
+</ul>
+<p>使用场景：</p>
+<ul>
+<li>当不能采用继承的方式对系统进行扩充或继承不利于系统的扩展和维护时（两种情况：1.系统中存在大量独立的扩展，如上例。2.因为类定义不能继承，如final类）</li>
+<li>在不影响其他对象的情况下，以动态、透明的方式给单个对象添加职责。</li>
+</ul>
+<h3 id="Facade-外观模式"><a href="#Facade-外观模式" class="headerlink" title="Facade 外观模式"></a>Facade 外观模式</h3><p>意图：又名门面模式，为子系统中的一组接口提供一个一致的接口，使这些子系统更加容易被访问。该模式对外有一个统一接口，外部应用程序不用关心内部子系统的具体细节，这样大大降低应用程序的复杂度，提高程序的可维护性。外观模式使迪米特法则的典型应用。</p>
+<p>以语音助手开关智能家电为例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//电灯类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Light</span>&#123;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">on</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="string">&quot;打开电灯&quot;</span>.sout;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">off</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="string">&quot;关闭电灯&quot;</span>.sout;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//电视机类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TV</span>&#123;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">on</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="string">&quot;打开电视机&quot;</span>.sout;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">off</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="string">&quot;关闭电视机&quot;</span>.sout;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//外观类：用户主要和该类对象进行交互，语音控制家电的开关</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SmartAppliancesFacade</span>&#123;</span><br><span class="line">  <span class="comment">//聚合电灯和电视机对象</span></span><br><span class="line">  <span class="keyword">private</span> Light light;</span><br><span class="line">  <span class="keyword">private</span> TV tv;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">public</span> <span class="title function_">smartAppliancesFacade</span><span class="params">()</span>&#123;</span><br><span class="line">    light = <span class="keyword">new</span> <span class="title class_">Light</span>();</span><br><span class="line">    tv = <span class="keyword">new</span> <span class="title class_">TV</span>();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">//通过语音控制</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">say</span><span class="params">(String msg)</span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(msg.contains(<span class="string">&quot;打开&quot;</span>))&#123;</span><br><span class="line">      on();</span><br><span class="line">    &#125;<span class="keyword">else</span> <span class="keyword">if</span>(msg.contains(<span class="string">&quot;关闭&quot;</span>))&#123;</span><br><span class="line">      off();</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">      <span class="string">&quot;听不懂你的指令&quot;</span>.sout;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">//一键打开</span></span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">on</span><span class="params">()</span>&#123;</span><br><span class="line">    light.on();</span><br><span class="line">    tv.on();</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">//一键关闭</span></span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">off</span><span class="params">()</span>&#123;</span><br><span class="line">    light.off();</span><br><span class="line">    tv.off();</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Client</span>&#123;</span><br><span class="line">  psvm&#123;</span><br><span class="line">    <span class="comment">//创建智能音箱对象</span></span><br><span class="line">    <span class="type">SmartAppliancesFacade</span> <span class="variable">facade</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SmartAppliancesFacade</span>();</span><br><span class="line">    <span class="comment">//控制家电</span></span><br><span class="line">    facade.say(<span class="string">&quot;打开家电&quot;</span>);</span><br><span class="line">    facade.say(<span class="string">&quot;关闭家电&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>外观模式的优点：</p>
+<ul>
+<li>降低了子系统与客户端之间的耦合度。</li>
+<li>对客户屏蔽了子系统组件，减少了客户处理的对象数目，使得子系统用起来更加容易。</li>
+</ul>
+<p>缺点：</p>
+<p>不符合开闭原则，修改很麻烦。</p>
+<p>使用场景：</p>
+<ul>
+<li>当一个复杂系统的子系统很多时，外观模式可以为系统设计一个简单的接口供外界访问。</li>
+<li>当客户端与多个子系统之间存在很大联系时，引入外观模式可以将它们分离，从而提高子系统的独立性和可移植性。</li>
+</ul>
+<h3 id="Flyweight-享元模式"><a href="#Flyweight-享元模式" class="headerlink" title="Flyweight 享元模式"></a>Flyweight 享元模式</h3><p>意图：运用共享技术来有效地支持大量细粒度对象的复用，通过共享已经存在的对象来大幅度减少需要创建的对象数量，避免大量相似对象的开销，从而提高系统资源的利用率。</p>
+<p>享元模式存在以下两种状态：</p>
+<ol>
+<li>内部状态。即不会随着环境的改变而改变的可共享部分，就是我使用和你使用时状态是一样的部分。</li>
+<li>外部状态（外部数据）。随着环境改变而改变的不可以共享的部分。</li>
+</ol>
+<p>以俄罗斯方块为例：</p>
+<p>形状和颜色不同的方块。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//抽象享元角色</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">class</span> <span class="title class_">AbstractBox</span>&#123;</span><br><span class="line">  <span class="comment">//获取形状</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">abstract</span> String <span class="title function_">getShape</span><span class="params">()</span>;</span><br><span class="line">  <span class="comment">//显示形状和颜色</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">display</span><span class="params">(String color)</span>&#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;方块形状：&quot;</span> + getshape()+ <span class="string">&quot;，颜色：&quot;</span> + color);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//具体享元角色：形状是I和L的方块图形</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">IBox</span> <span class="keyword">extends</span> <span class="title class_">AbstractBox</span>&#123;</span><br><span class="line">  <span class="keyword">public</span> String <span class="title function_">getShape</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;I&quot;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">LBox</span> <span class="keyword">extends</span> <span class="title class_">AbstractBox</span>&#123;</span><br><span class="line">  <span class="keyword">public</span> String <span class="title function_">getShape</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;L&quot;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//工厂类，将该类设计为单例（构造方法私有）</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">BoxFactory</span>&#123;</span><br><span class="line">  <span class="keyword">private</span> HashMap&lt;String,AbstractBox&gt; map;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">//在构造方法中进行初始化操作</span></span><br><span class="line">  <span class="keyword">private</span> <span class="title function_">BoxFactory</span><span class="params">()</span>&#123;</span><br><span class="line">    map = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;String,AbstractBox&gt;();</span><br><span class="line">    map.put(<span class="string">&quot;I&quot;</span>,<span class="keyword">new</span> <span class="title class_">IBox</span>());</span><br><span class="line">    map.put(<span class="string">&quot;L&quot;</span>,<span class="keyword">new</span> <span class="title class_">LBox</span>());</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">//提供一个方法获取该工厂对象（饿汉式）</span></span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">BoxFactory</span> <span class="variable">factory</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BoxFactory</span>();</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> BoxFactory <span class="title function_">getInstance</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> factory;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">//根据名称获取图形对象</span></span><br><span class="line">  <span class="keyword">public</span> AbstractBox <span class="title function_">getShape</span><span class="params">(String name)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> map.get(name);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Client</span>&#123;</span><br><span class="line">  psvm&#123;</span><br><span class="line">    <span class="comment">//获取I形状对象</span></span><br><span class="line">    <span class="type">AbstractBox</span> <span class="variable">box1</span> <span class="operator">=</span> BoxFactory.getInstance().getShape(<span class="string">&quot;I&quot;</span>);</span><br><span class="line">    box1.display(<span class="string">&quot;红色&quot;</span>);</span><br><span class="line">  &#125;<span class="comment">//输出：方块形状：I，颜色：红色</span></span><br><span class="line">  </span><br><span class="line">    <span class="comment">//获取L形状对象</span></span><br><span class="line">    <span class="type">AbstractBox</span> <span class="variable">box2</span> <span class="operator">=</span> BoxFactory.getInstance().getShape(<span class="string">&quot;L&quot;</span>);</span><br><span class="line">    box2.display(<span class="string">&quot;蓝色&quot;</span>);</span><br><span class="line">  &#125;<span class="comment">//输出：方块形状：L，颜色：蓝色</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>享元模式优点：</p>
+<ul>
+<li>极大减少内存中相似或相同对象的数量，节约系统资源</li>
+<li>享元模式中的外部状态相对独立，且不影响内部状态</li>
+</ul>
+<p>缺点：</p>
+<p>为了使对象可以共享，需要将享元对象的部分状态外部化，分离内部状态和外部状态，使程序逻辑复杂。</p>
+<p>使用场景：</p>
+<ul>
+<li>一个系统有大量相同或相似的对象，造成内存的大量耗费。</li>
+<li>对象的大部分状态都可以外部化，可以将这些外部状态传入对象中。</li>
+<li>使用享元模式时需要维护一个存储享元对象的享元池，而这需要耗费一定的系统资源。因此，应当在需要多次重复使用享元对象时才值得使用享元模式。</li>
+</ul>
+<p><strong>享元模式在JDK中的应用（面试题）</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Demo</span>&#123;</span><br><span class="line">  psvm&#123;</span><br><span class="line">    <span class="type">Integer</span> <span class="variable">i1</span> <span class="operator">=</span> <span class="number">127</span>;</span><br><span class="line">    <span class="type">Integer</span> <span class="variable">i2</span> <span class="operator">=</span> <span class="number">127</span>;</span><br><span class="line">    <span class="type">Integer</span> <span class="variable">i3</span> <span class="operator">=</span> <span class="number">128</span>;</span><br><span class="line">    <span class="type">Integer</span> <span class="variable">i4</span> <span class="operator">=</span> <span class="number">128</span>;</span><br><span class="line">    System.out.println(<span class="string">&quot;i1和i2是否是同一个对象？&quot;</span>+(i1==i2)); <span class="comment">//true</span></span><br><span class="line">    System.out.println(<span class="string">&quot;i3和i4是否是同一个对象？&quot;</span>+(i3==i4)); <span class="comment">//false</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>进行反编译后，发现Java直接给Integer类型的变量赋值是这样的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Integer</span> <span class="variable">i1</span> <span class="operator">=</span> Integer.valueOf((<span class="type">int</span>)<span class="number">127</span>);</span><br><span class="line"><span class="type">Integer</span> <span class="variable">i2</span> <span class="operator">=</span> Integer.valueOf((<span class="type">int</span>)<span class="number">127</span>);</span><br><span class="line"><span class="type">Integer</span> <span class="variable">i3</span> <span class="operator">=</span> Integer.valueOf((<span class="type">int</span>)<span class="number">128</span>);</span><br><span class="line"><span class="type">Integer</span> <span class="variable">i4</span> <span class="operator">=</span> Integer.valueOf((<span class="type">int</span>)<span class="number">128</span>);</span><br></pre></td></tr></table></figure>
+
+<p>ValueOf( )方法底层：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> Integer <span class="title function_">ValueOf</span><span class="params">(<span class="type">int</span> i)</span>&#123;</span><br><span class="line">  <span class="keyword">if</span>(i &gt;= IntegerCache.low &amp;&amp; i &lt;= IntegerCache.high)&#123;</span><br><span class="line">    <span class="keyword">return</span> IntegerCache.cache[i + (-IntegerCache.low)];</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Integer</span>(i);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>IntegerCache是Integer类里面的静态内部类，定义了low=-128，high=127。</p>
+<p>所以，<strong>Integer默认先创建并缓存-128～127之间数的Integer对象，当调用valueOf时如果参数在-128～127之间，则计算下标并从缓存中返回，否则就创建一个新的Integer对象。</strong>所以i1 == i2，i3 != i4</p>
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2022/03/10/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E7%BB%93%E6%9E%84%E5%9E%8B%E6%A8%A1%E5%BC%8F-%E9%80%82%E9%85%8D%E5%99%A8-%E6%A1%A5%E6%8E%A5-%E7%BB%84%E5%90%88/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+                Ye Yang | 
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://hexo.io/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+  </body>
+</html>
