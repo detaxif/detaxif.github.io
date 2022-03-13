@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ch">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="yeung">
+
+
+
+
+
+
+
+<title>设计模式-结构型模式-代理 | YE&#39;s BLOG</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+
+
+
+  <meta name="generator" content="Hexo 5.4.1"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">Ultralight Beam.</a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archives</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/about/">About</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/tag/">Tags</a>
+              </li> 
+                   
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">
+                            设计模式
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                设计模式-结构型模式-代理
+            
+            
+        </div>
+        <span class="post-date">
+            03 13, 2022
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h1 id="设计模式"><a href="#设计模式" class="headerlink" title="设计模式"></a>设计模式</h1><h2 id="结构型模式"><a href="#结构型模式" class="headerlink" title="结构型模式"></a>结构型模式</h2><h3 id="Proxy-代理模式"><a href="#Proxy-代理模式" class="headerlink" title="Proxy 代理模式"></a>Proxy 代理模式</h3><p>意图：为其他对象提供一种代理以控制对这个对象的访问。</p>
+<p>代理模式分为静态代理和动态代理。</p>
+<h4 id="静态代理"><a href="#静态代理" class="headerlink" title="静态代理"></a>静态代理</h4><p>以租房为例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//抽象角色：租房 （一般用接口或抽象类来定义）</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">Rent</span>&#123;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">rent</span><span class="params">()</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//真实角色：房东 （被代理的角色）</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Host</span> <span class="keyword">implements</span> <span class="title class_">Rent</span>&#123;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">rent</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="string">&quot;房东要出租房子&quot;</span>.sout;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//代理角色：房屋中介 （代理真实角色的角色）</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Proxy</span> <span class="keyword">implements</span> <span class="title class_">Rent</span>&#123;</span><br><span class="line">  <span class="keyword">private</span> Host host; <span class="comment">//组合的方式</span></span><br><span class="line">  </span><br><span class="line">  <span class="keyword">public</span> <span class="title function_">Proxy</span><span class="params">()</span>&#123;&#125;</span><br><span class="line">  <span class="keyword">public</span> <span class="title function_">Proxy</span><span class="params">(Host host)</span>&#123;</span><br><span class="line">    <span class="built_in">this</span>.host = host;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">rent</span><span class="params">()</span>&#123;</span><br><span class="line">		seeHouse();</span><br><span class="line">    host.rent();</span><br><span class="line">    contract();</span><br><span class="line">    fee();</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">//看房</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">seeHouse</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="string">&quot;中介带你看房&quot;</span>.sout;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">//收中介费</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">fee</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="string">&quot;收中介费&quot;</span>.sout;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">//签合同</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">contract</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="string">&quot;签租赁合同&quot;</span>.sout;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Client</span>&#123;</span><br><span class="line">  psvm&#123;</span><br><span class="line">    <span class="comment">//房东要出租房子</span></span><br><span class="line">    <span class="type">Host</span> <span class="variable">host</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Host</span>();</span><br><span class="line">    <span class="comment">//代理，中介帮房东租房子，而且中介会有一些附属操作</span></span><br><span class="line">    <span class="type">Proxy</span> <span class="variable">proxy</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Proxy</span>(host);</span><br><span class="line">    proxy.rent();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>例2：给一个实现CRUD的UserService加入日志功能</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">UserService</span>&#123;</span><br><span class="line">  <span class="keyword">void</span> <span class="title function_">add</span><span class="params">()</span>;</span><br><span class="line">  <span class="keyword">void</span> <span class="title function_">delete</span><span class="params">()</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">UserServiceImpl</span> <span class="keyword">implements</span> <span class="title class_">UserService</span>&#123;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">add</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="string">&quot;增加了一个用户&quot;</span>.sout;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">delete</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="string">&quot;删除了一个用户&quot;</span>.sout;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">UserServiceProxy</span> <span class="keyword">implements</span> <span class="title class_">UserService</span>&#123;</span><br><span class="line">  <span class="keyword">private</span> UserServiceImpl userService;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setUserService</span><span class="params">(UserServiceImpl userService)</span>&#123;</span><br><span class="line">    <span class="built_in">this</span>.userService = userService;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">log</span><span class="params">(String msg)</span>&#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;使用了&quot;</span>+ msg +<span class="string">&quot;方法&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">add</span><span class="params">()</span>&#123;</span><br><span class="line">    log(<span class="string">&quot;add&quot;</span>);</span><br><span class="line">    userService.add();</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">delete</span><span class="params">()</span>&#123;</span><br><span class="line">    log(<span class="string">&quot;delete&quot;</span>);</span><br><span class="line">    userService.delete();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Client</span>&#123;</span><br><span class="line">  psvm&#123;</span><br><span class="line">    <span class="type">UserServiceImpl</span> <span class="variable">userService</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">UserServiceImpl</span>();</span><br><span class="line">    </span><br><span class="line">    <span class="type">UserServiceProxy</span> <span class="variable">proxy</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">UserServiceProxy</span>();</span><br><span class="line">    proxy.setUserService(userService);</span><br><span class="line">    </span><br><span class="line">    proxy.add();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>代理模式的优点：</p>
+<ul>
+<li>可以使真实角色的操作更加纯粹，不用去关注公共的业务。</li>
+<li>公共业务交给代理角色，实现了业务的分工。</li>
+<li>扩展公共业务时，方便集中管理。</li>
+</ul>
+<p>缺点：一个真实角色就会产生一个代理角色，代码量会翻倍。</p>
+<h4 id="动态代理"><a href="#动态代理" class="headerlink" title="动态代理"></a>动态代理</h4><ul>
+<li>动态代理和静态代理的参与者一样。</li>
+<li>动态代理的代理类是动态生成的，不是我们直接写好的。</li>
+<li>动态代理分为两类：1.基于接口：JDK动态代理；2.基于类：cglib。</li>
+</ul>
+<p>用静态代理中的租房为例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//抽象角色：租房 </span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">Rent</span>&#123;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">rent</span><span class="params">()</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//真实角色：房东 </span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Host</span> <span class="keyword">implements</span> <span class="title class_">Rent</span>&#123;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">rent</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="string">&quot;房东要出租房子&quot;</span>.sout;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//用这个类自动生成代理类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ProxyInvocationHandler</span> <span class="keyword">implements</span> <span class="title class_">InvocationHandler</span>&#123;</span><br><span class="line">  <span class="comment">//被代理的接口</span></span><br><span class="line">  <span class="keyword">private</span> Rent rent;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setRent</span><span class="params">(Rent rent)</span>&#123;</span><br><span class="line">    <span class="built_in">this</span>.rent = rent;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">//生成得到代理类</span></span><br><span class="line">	<span class="keyword">public</span> Object <span class="title function_">getProxy</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> Proxy.newProxyInstance(<span class="built_in">this</span>.getClass().getClassLoader(), rent.getClass().getInterfaces(), <span class="built_in">this</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">//处理代理实例 返回结果</span></span><br><span class="line">  <span class="keyword">public</span> Object <span class="title function_">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span> <span class="keyword">throws</span> Throwable&#123;</span><br><span class="line">    <span class="comment">//动态代理的本质 就是使用反射机制实现</span></span><br><span class="line">    seeHouse();</span><br><span class="line">    <span class="type">Object</span> <span class="variable">result</span> <span class="operator">=</span> method.invoke(rent,args);</span><br><span class="line">    fee();</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">seeHouse</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="string">&quot;中介带你看房&quot;</span>.sout;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">fee</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="string">&quot;收中介费&quot;</span>.sout;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Client</span>&#123;</span><br><span class="line">  psvm&#123;</span><br><span class="line">    <span class="comment">//真实角色</span></span><br><span class="line">    <span class="type">Host</span> <span class="variable">host</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Host</span>();</span><br><span class="line">    <span class="comment">//代理角色（现在不存在）</span></span><br><span class="line">    <span class="type">ProxyInvocationHandler</span> <span class="variable">pih</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ProxyInvocationHandler</span>();</span><br><span class="line">    <span class="comment">//通过调用程序处理角色来处理我们要调用的接口对象</span></span><br><span class="line">    pih.setRent(host);</span><br><span class="line">    <span class="type">Rent</span> <span class="variable">proxy</span> <span class="operator">=</span> (Rent) pih.getProxy(); <span class="comment">//这里的proxy是动态生成的</span></span><br><span class="line">    proxy.rent();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>静态代理中的CRUD UserService为例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//用这个类自动生成代理类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ProxyInvocationHandler</span> <span class="keyword">implements</span> <span class="title class_">InvocationHandler</span>&#123;</span><br><span class="line">  <span class="comment">//被代理的接口</span></span><br><span class="line">  <span class="keyword">private</span> Object target;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setTarget</span><span class="params">(Object target)</span>&#123;</span><br><span class="line">    <span class="built_in">this</span>.target = target;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">//生成得到代理类</span></span><br><span class="line">	<span class="keyword">public</span> Object <span class="title function_">getProxy</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> Proxy.newProxyInstance(<span class="built_in">this</span>.getClass().getClassLoader(), target.getClass().getInterfaces(), <span class="built_in">this</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">//处理代理实例 返回结果</span></span><br><span class="line">  <span class="keyword">public</span> Object <span class="title function_">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span> <span class="keyword">throws</span> Throwable&#123;</span><br><span class="line">    <span class="comment">//动态代理的本质 就是使用反射机制实现</span></span><br><span class="line">		log(method.getName());</span><br><span class="line">    <span class="type">Object</span> <span class="variable">result</span> <span class="operator">=</span> method.invoke(target,args);</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">log</span><span class="params">(String msg)</span>&#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;使用了&quot;</span>+ msg +<span class="string">&quot;方法&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Client</span>&#123;</span><br><span class="line">  psvm&#123;</span><br><span class="line">    <span class="comment">//真实角色</span></span><br><span class="line">    <span class="type">userServiceImpl</span> <span class="variable">userService</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">UserServiceImpl</span>();</span><br><span class="line">    <span class="comment">//代理角色</span></span><br><span class="line">    <span class="type">ProxyInvocationHandler</span> <span class="variable">pih</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ProxyInvocationHandler</span>();</span><br><span class="line">    <span class="comment">//设置要代理的对象</span></span><br><span class="line">    pih.setTarget(userService);</span><br><span class="line">    <span class="comment">//动态生成代理类</span></span><br><span class="line">    <span class="type">UserService</span> <span class="variable">proxy</span> <span class="operator">=</span> (UserService) pih.getProxy();</span><br><span class="line">    proxy.add();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>动态代理的优点：</p>
+<p>静态代理的优点 + 一个动态代理类可以代理多个类，只要实现了同一个接口即可。</p>
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2022/03/12/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E7%BB%93%E6%9E%84%E5%9E%8B%E6%A8%A1%E5%BC%8F-%E8%A3%85%E9%A5%B0-%E5%A4%96%E8%A7%82-%E4%BA%AB%E5%85%83/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+                Ye Yang | 
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://hexo.io/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+  </body>
+</html>
