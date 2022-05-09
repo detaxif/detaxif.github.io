@@ -133,16 +133,31 @@
     </div>
 </div>
     <div class="post-content">
-    <h1 id="Redis-入门-配置-常用数据类型"><a href="#Redis-入门-配置-常用数据类型" class="headerlink" title="Redis-入门+配置+常用数据类型"></a>Redis-入门+配置+常用数据类型</h1><h2 id="1-安装-配置后台启动"><a href="#1-安装-配置后台启动" class="headerlink" title="1. 安装 配置后台启动"></a>1. 安装 配置后台启动</h2><p>在/library新建/Redis，解压redis-6.2.7.tar.gz。/redis-6.2.7目录下<code>sudo make test</code> , <code>sudo make install</code>。</p>
-<p>配置后台启动：</p>
+    <h1 id="Redis-入门-配置-常用数据类型"><a href="#Redis-入门-配置-常用数据类型" class="headerlink" title="Redis-入门+配置+常用数据类型"></a>Redis-入门+配置+常用数据类型</h1><h2 id="1-安装-配置"><a href="#1-安装-配置" class="headerlink" title="1. 安装 配置"></a>1. 安装 配置</h2><ul>
+<li>安装</li>
+</ul>
+<p>在/library新建/Redis，解压redis-6.2.7.tar.gz。/redis-6.2.7目录下<code>sudo make test</code> , <code>sudo make install</code>。</p>
+<ul>
+<li>配置</li>
+</ul>
+<ol>
+<li>配置后台启动：</li>
+</ol>
 <p>/redis-6.2.7下，<code>sudo cp redis.conf /etc/redis.conf</code>，<code>cd /etc</code>，<code>sudo vi redis.conf</code>，找到daemonize参数，no改为yes。</p>
+<ol start="2">
+<li>网络配置 注释bind以允许远程访问服务器。</li>
+<li>Protected-mode 默认yes。</li>
+<li>设置密码 #requirepass foobared 去掉注释，foobared改为自己的密码。</li>
+</ol>
+<ul>
+<li>启动、关闭命令</li>
+</ul>
 <p>后台启动命令：<code>cd /usr/local/bin</code>，<code>redis-server /etc/redis.conf</code>。</p>
 <p>客户端连接到redis命令：<code>redis-cli</code>，测试验证：<code>ping</code>。</p>
+<p>输入密码：<code>auth password</code>。</p>
 <p>Redis关闭：</p>
-<ul>
-<li>单实例关闭：redis-cli shutdown</li>
-<li>多实例关闭：指定端口关闭，redis-cli -p 6379 shutdown</li>
-</ul>
+<p>单实例关闭：redis-cli shutdown</p>
+<p>多实例关闭：指定端口关闭，redis-cli -p 6379 shutdown</p>
 <h2 id="2-Redis-入门"><a href="#2-Redis-入门" class="headerlink" title="2. Redis 入门"></a>2. Redis 入门</h2><h3 id="2-1-Redis-key的操作"><a href="#2-1-Redis-key的操作" class="headerlink" title="2.1 Redis key的操作"></a>2.1 Redis key的操作</h3><table>
 <thead>
 <tr>
@@ -454,11 +469,95 @@
 <li>hash，hash的作用就是关联元素value和权重score，保证value的唯一性，可以通过value找到相应的score值。</li>
 <li>跳跃表（跳表），目的在于给元素value排序，根据socre的范围获取元素。</li>
 </ol>
-<h2 id="4-Redis配置文件"><a href="#4-Redis配置文件" class="headerlink" title="4. Redis配置文件"></a>4. Redis配置文件</h2><ol>
-<li>网络配置 注释bind以允许远程访问服务器</li>
-<li>Protected-mode yes</li>
-<li>设置密码 #requirepass foobared 去掉注释，foobared改为自己的密码</li>
+<h2 id="4-Redis-新数据类型"><a href="#4-Redis-新数据类型" class="headerlink" title="4. Redis 新数据类型"></a>4. Redis 新数据类型</h2><h3 id="4-1-Bitmaps"><a href="#4-1-Bitmaps" class="headerlink" title="4.1 Bitmaps"></a>4.1 Bitmaps</h3><p>计算机使用二进制（位）作为信息的基础单位，1个字节等于8位，例如”abc”这个字符串由3个字节组成，实际在计算机存储时将其用二进制表示，’a’ ‘b’ ‘c’对应的ASCII码分别是97、98、99，对应的二进制分别是01100001、01100010、01100011。</p>
+<p>Redis提供Bitmaps这个“数据类型”实现对位的操作，它本身不是一种数据类型，它实际上就是字符串（key-value），但它可以对字符串的位进行操作。可以把Bitmaps想象成一个以位为单位的数组，数组的每个单元只能存储0和1，数组的下标在Bitmaps中叫做<strong>偏移量。</strong></p>
+<table>
+<thead>
+<tr>
+<th align="center">命令</th>
+<th align="center">意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">setbit &lt;key&gt; &lt;offset&gt; &lt;value&gt;</td>
+<td align="center">设置Bitmaps中某个偏移量的值（0或1），偏移量从0开始</td>
+</tr>
+<tr>
+<td align="center">getbit &lt;key&gt; &lt;offset&gt;</td>
+<td align="center">获取Bitmaps中某个偏移量的值</td>
+</tr>
+<tr>
+<td align="center">bitcount &lt;key&gt; &lt;start&gt; &lt;end&gt;</td>
+<td align="center">统计字符串被设置为1的bit数，start和end参数是字节byte数，而Bitmaps按位bit存储，1byte=8bits，所以bitcount key 0 0统计的是key中offset前8位为1的数量。参数可以使用负数</td>
+</tr>
+<tr>
+<td align="center">bitop and / or / not / xor &lt;destkey&gt; [key…]</td>
+<td align="center">bitop是一个复合操作，可以做多个Bitmaps的and交集、or并集、not非、xor异或操作，并将结果保存在destkey这个bitmaps中</td>
+</tr>
+</tbody></table>
+<p>实例：假设现有20个用户，记录每个用户是否访问过网站，存放在Bitmaps中，访问过的用户记做1，没有记做0，偏移量作为用户的id。</p>
+<p>bitop使用实例：现在要统计在5月8日和5月9日都访问过网站的用户。</p>
+<p>5月8日访问网站的userid=1,2,5,9</p>
+<p>5月9日访问网站的userid=0,1,4,9</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">setbit user0508 1/2/5/9 1</span><br><span class="line">setbit user0509 0/1/4/9 1</span><br><span class="line">#统计两天都访问过网站的用户：</span><br><span class="line">bitop and user0508_0509 user0508 user0509</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Bitmaps与set对比</li>
+</ul>
+<p>活跃用户多，使用Bitmaps，可以节省存储空间。如果活跃用户少，使用set，因为Bitmaps大部分位是0，反而浪费空间。</p>
+<h3 id="4-2-HyperLogLog"><a href="#4-2-HyperLogLog" class="headerlink" title="4.2 HyperLogLog"></a>4.2 HyperLogLog</h3><p>实际应用中，我们会遇到统计相关的功能需求，比如统计网站页面访问量，可以用Redis的incr / incrby实现。</p>
+<p>但像是UniqueVisitor独立访客（一个用户多次访问只记录一次）、独立IP数、搜索记录数等需要去重和计数的问题（基数问题）如何解决？</p>
+<ol>
+<li>数据存储在MySQL表中，使用distinct count计算不重复个数。</li>
+<li>使用Redis提供的hash / set / bitmaps等数据结构。</li>
 </ol>
+<p>以上方案虽然结果精确，但是随着数据的增加，会导致占用空间越来越大，对于非常大的数据集是不切实际的。</p>
+<p>我们可以用HyperLogLog，通过降低一定的精度来平衡存储空间。</p>
+<table>
+<thead>
+<tr>
+<th align="center">命令</th>
+<th align="center">意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">pfadd &lt;key&gt; &lt;element&gt; [element…]</td>
+<td align="center">添加一个或多个元素到HyperLogLog中（元素重复时无法添加进去）</td>
+</tr>
+<tr>
+<td align="center">pfcount &lt;key&gt; [key…]</td>
+<td align="center">计算HLL key的近似基数，可以计算多个HLL，比如用HLL存储网站每天的UV，计算一周的UV可以用7天的UV合并计算</td>
+</tr>
+<tr>
+<td align="center">pfmerge &lt;destkey&gt; &lt;sourcekey&gt; [sourcekey…]</td>
+<td align="center">将一个或多个HLL合并后的结果存储在destkey HLL中，比如每个月的活跃用户可以用每天的活跃用户合并计算</td>
+</tr>
+</tbody></table>
+<h3 id="4-3-Geospatial"><a href="#4-3-Geospatial" class="headerlink" title="4.3 Geospatial"></a>4.3 Geospatial</h3><p>GEO-Geographic的缩写，该类型用于存储经纬度。</p>
+<table>
+<thead>
+<tr>
+<th align="center">命令</th>
+<th align="center">意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">geoadd &lt;key&gt; &lt;longitude&gt; &lt;latitude&gt; &lt;member&gt; [longitude latitude member…]</td>
+<td align="center">添加一个或多个地理位置（经度 纬度 名称）</td>
+</tr>
+<tr>
+<td align="center">geopos &lt;key&gt; &lt;member&gt; [member…]</td>
+<td align="center">获得指定地区的坐标值</td>
+</tr>
+<tr>
+<td align="center">geodist &lt;key&gt; &lt;member1&gt; &lt;member2&gt;  [m|km|ft|mi]</td>
+<td align="center">获取两个位置之间的直线距离</td>
+</tr>
+<tr>
+<td align="center">georadius &lt;key&gt; &lt;longitude&gt; &lt;latitude&gt; &lt;radius&gt; m|km|ft|mi</td>
+<td align="center">以给定的经纬度位中心，找出某一半径内的元素</td>
+</tr>
+</tbody></table>
 
 </div> 
 
