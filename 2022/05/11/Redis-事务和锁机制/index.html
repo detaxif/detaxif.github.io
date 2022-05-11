@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ch">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="yeung">
+
+
+
+
+
+
+
+<title>Redis-事务和锁机制 | YE&#39;s BLOG</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+
+
+
+  <meta name="generator" content="Hexo 5.4.1"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">Ultralight Beam.</a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archives</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/about/">About</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/tag/">Tags</a>
+              </li> 
+                   
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/Redis/">
+                            Redis
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                Redis-事务和锁机制
+            
+            
+        </div>
+        <span class="post-date">
+            05 11, 2022
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h1 id="Redis-事务和锁机制"><a href="#Redis-事务和锁机制" class="headerlink" title="Redis-事务和锁机制"></a>Redis-事务和锁机制</h1><h2 id="7-Redis的事务"><a href="#7-Redis的事务" class="headerlink" title="7. Redis的事务"></a>7. Redis的事务</h2><p>Redis事务是一个单独的隔离操作，事务中的所有命令都会序列化、按顺序地执行。事务在执行的过程中，不会被其他客户端发送来的命令请求所打断。</p>
+<p><strong>Redis事务的主要作用就是串联多个命令，以防止别的命令插队。</strong></p>
+<h3 id="7-1-Multi、Exec、Discard命令"><a href="#7-1-Multi、Exec、Discard命令" class="headerlink" title="7.1 Multi、Exec、Discard命令"></a>7.1 Multi、Exec、Discard命令</h3><p>Multi：语句的组队阶段。输入Multi命令后，之后输入的命令会依次进入命令队列，但不会执行。</p>
+<p>Exec：执行阶段。输入Exec命令后，Redis会将之前的命令队列中的命令依次执行。</p>
+<p>Discard：放弃组队。</p>
+<h3 id="7-2-事务的错误处理"><a href="#7-2-事务的错误处理" class="headerlink" title="7.2 事务的错误处理"></a>7.2 事务的错误处理</h3><ol>
+<li>在Multi阶段，输入命令的时候报错，那么执行时整个队列都会被discard取消。</li>
+<li>Multi阶段组队成功，在Exec执行时某条命令报错，只有报错的命令不被执行，其他命令都会执行。</li>
+</ol>
+<h3 id="7-3-Redis事务三大特性"><a href="#7-3-Redis事务三大特性" class="headerlink" title="7.3 Redis事务三大特性"></a>7.3 Redis事务三大特性</h3><ol>
+<li>单独的隔离操作：所有命令都会序列化，按顺序执行。</li>
+<li>没有隔离级别的概念。</li>
+<li>不保证原子性：事务中如果一条命令执行失败，其后的命令仍然会被执行，没有回滚。</li>
+</ol>
+<h2 id="8-悲观锁和乐观锁"><a href="#8-悲观锁和乐观锁" class="headerlink" title="8. 悲观锁和乐观锁"></a>8. 悲观锁和乐观锁</h2><ul>
+<li>悲观锁，很悲观，每次去拿数据的时候都认为别人会修改，所以每次拿数据的时候都会上锁。别人想拿这个数据时就会被block阻塞。效率低，并发性差。</li>
+<li>乐观锁：不会上锁，但是在更新的时候会先判断在此期间别人有没有更新过这个数据，可以使用版本号等机制。适用于多读的场景，可以提高吞吐量。Redis就是利用这种check-and-set机制实现事务的。</li>
+</ul>
+<h3 id="8-1-乐观锁在Redis中的使用"><a href="#8-1-乐观锁在Redis中的使用" class="headerlink" title="8.1 乐观锁在Redis中的使用"></a>8.1 乐观锁在Redis中的使用</h3><p>在执行multi之前，先执行<code>watch key1 [key2]</code>可以监视一个或多个key，如果在事务执行之前，这个（或这些）key被其他命令所改动，那么事务将被打断。</p>
+<p><code>unwatch</code>取消对所有key的监视。如果在watch之后，已经执行过exec或discard命令，就不需要执行unwatch了。</p>
+<h2 id="9-实战：商品秒杀"><a href="#9-实战：商品秒杀" class="headerlink" title="9. 实战：商品秒杀"></a>9. 实战：商品秒杀</h2><p>写一个JedisPoolUtil工具类，利用连接池解决超时问题：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">JedisPoolUtil</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">volatile</span> <span class="type">JedisPool</span> <span class="variable">jedisPool</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">JedisPoolUtil</span><span class="params">()</span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> JedisPool <span class="title function_">getJedisPoolInstance</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="literal">null</span> == jedisPool)&#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (JedisPoolUtil.class)&#123;</span><br><span class="line">                <span class="keyword">if</span>(<span class="literal">null</span> == jedisPool)&#123;</span><br><span class="line">                    <span class="type">JedisPoolConfig</span> <span class="variable">poolConfig</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">JedisPoolConfig</span>();</span><br><span class="line">                    poolConfig.setMaxTotal(<span class="number">200</span>);</span><br><span class="line">                    poolConfig.setMaxIdle(<span class="number">32</span>);</span><br><span class="line">                    poolConfig.setMaxWaitMillis(<span class="number">100</span>*<span class="number">1000</span>);</span><br><span class="line">                    poolConfig.setBlockWhenExhausted(<span class="literal">true</span>);</span><br><span class="line">                    poolConfig.setTestOnBorrow(<span class="literal">true</span>);</span><br><span class="line"></span><br><span class="line">                    jedisPool = <span class="keyword">new</span> <span class="title class_">JedisPool</span>(poolConfig,<span class="string">&quot;127.0.0.1&quot;</span>,<span class="number">6379</span>,<span class="number">60000</span>,<span class="string">&quot;password&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> jedisPool;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>秒杀的实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SecKill</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//秒杀过程</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">boolean</span> <span class="title function_">doSecKill</span><span class="params">(String uid, String pid)</span>&#123;</span><br><span class="line">        <span class="comment">// 1.uid, pid非空判断</span></span><br><span class="line">        <span class="keyword">if</span>(uid == <span class="literal">null</span> || pid == <span class="literal">null</span>) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 2.连接redis 通过Jedis连接池工具类获得jedis对象 解决连接超时的问题</span></span><br><span class="line">        <span class="type">JedisPool</span> <span class="variable">jedisPoolInstance</span> <span class="operator">=</span> JedisPoolUtil.getJedisPoolInstance();</span><br><span class="line">        <span class="type">Jedis</span> <span class="variable">jedis</span> <span class="operator">=</span> jedisPoolInstance.getResource();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 3.拼接key</span></span><br><span class="line">        <span class="comment">//库存key</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">stockKey</span> <span class="operator">=</span> <span class="string">&quot;sk:&quot;</span>+pid+<span class="string">&quot;:qt&quot;</span>;</span><br><span class="line">        <span class="comment">//秒杀这件商品成功的用户key</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">userKey</span> <span class="operator">=</span> <span class="string">&quot;sk:&quot;</span>+pid+<span class="string">&quot;:user&quot;</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 3.5 监视库存</span></span><br><span class="line">        jedis.watch(stockKey);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 4.获取库存，如果库存为null，则秒杀还没有开始</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">stock</span> <span class="operator">=</span> jedis.get(stockKey);</span><br><span class="line">        <span class="keyword">if</span>(stock == <span class="literal">null</span>)&#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;秒杀还没有开始，请等待&quot;</span>);</span><br><span class="line">            jedis.close();</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 5.判断用户是否重复秒杀操作</span></span><br><span class="line">        <span class="keyword">if</span>(jedis.sismember(userKey, uid))&#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;用户已经秒杀成功了，不能重复秒杀&quot;</span>);</span><br><span class="line">            jedis.close();</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 6.判断商品库存，小于1时秒杀结束</span></span><br><span class="line">        <span class="keyword">if</span>(Integer.parseInt(stock) &lt;= <span class="number">0</span>)&#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;秒杀已经结束&quot;</span>);</span><br><span class="line">            jedis.close();</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//7. 秒杀过程</span></span><br><span class="line">        <span class="comment">// 开启事务 利用乐观锁 解决超卖的问题</span></span><br><span class="line">        <span class="type">Transaction</span> <span class="variable">multi</span> <span class="operator">=</span> jedis.multi();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 组队</span></span><br><span class="line">        multi.decr(stockKey); <span class="comment">// 库存-1</span></span><br><span class="line">        multi.sadd(userKey,uid); <span class="comment">// 秒杀成功的用户，ID加到列表中</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 执行</span></span><br><span class="line">        List&lt;Object&gt; results = multi.exec();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span>(<span class="literal">null</span> == results || results.size() == <span class="number">0</span>)&#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;秒杀失败&quot;</span>);</span><br><span class="line">            jedis.close();</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;秒杀成功&quot;</span>);</span><br><span class="line"></span><br><span class="line">        jedis.close();</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>利用事务、乐观锁解决了超卖的问题，但还存在库存遗留的问题：因为乐观锁的原因，在高并发的情况下，同时秒杀的很多用户会操作失败。</p>
+<p>解决库存遗留：使用LUA脚本，因为LUA脚本会按顺序执行，一个个线程执行，不会出现库存遗留的问题。</p>
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2022/05/10/Redis-Jedis-SpringBoot%E6%95%B4%E5%90%88Redis/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+                Ye Yang | 
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://hexo.io/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+  </body>
+</html>
