@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ch">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="yeung">
+
+
+
+
+
+
+
+<title>Redis-持久化操作+主从复制 | YE&#39;s BLOG</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+
+
+
+  <meta name="generator" content="Hexo 5.4.1"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">Ultralight Beam.</a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archives</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/about/">About</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/tag/">Tags</a>
+              </li> 
+                   
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/Redis/">
+                            Redis
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                Redis-持久化操作+主从复制
+            
+            
+        </div>
+        <span class="post-date">
+            05 12, 2022
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h1 id="Redis-持久化操作-主从复制"><a href="#Redis-持久化操作-主从复制" class="headerlink" title="Redis-持久化操作+主从复制"></a>Redis-持久化操作+主从复制</h1><h2 id="10-持久化操作"><a href="#10-持久化操作" class="headerlink" title="10. 持久化操作"></a>10. 持久化操作</h2><p>Redis提供了两种不同形式的持久化方式：RDB和AOF</p>
+<h3 id="10-1-RDB-Redis-DataBase"><a href="#10-1-RDB-Redis-DataBase" class="headerlink" title="10.1 RDB Redis DataBase"></a>10.1 RDB Redis DataBase</h3><p>RDB就是在指定的时间间隔内，将内存中的数据集快照写入磁盘。默认是开启的。</p>
+<ul>
+<li>RDB如何实现备份？</li>
+</ul>
+<p>Redis会单独创建（fork）一个子进程来进行持久化，会先将数据写入到一个临时文件中，等数据都同步到临时文件后，用这个临时文件替换上次持久化好的文件（dump.rdb）。</p>
+<p>Fork的作用是复制一个与当前进程一样的进程，新进程的所有数据数值都与原进程一致，但是一个全新的进程，作为原进程的子进程。</p>
+<ul>
+<li>RDB的优势</li>
+</ul>
+<ol>
+<li>适合大规模的数据恢复</li>
+<li>节省磁盘空间</li>
+<li>恢复速度快</li>
+<li>对数据完整性和一致性要求不高时适合使用</li>
+</ol>
+<ul>
+<li>RDB的劣势</li>
+</ul>
+<ol>
+<li>Fork进程时，需要2倍的内存空间，浪费空间</li>
+<li>虽然Redis在fork时使用了写时拷贝技术，但在数据庞大的情况下还是比较消耗性能</li>
+<li>如果Redis意外down掉，会丢失最后一次快照之后的所有修改</li>
+</ol>
+<h3 id="10-2-AOF-Append-Only-File"><a href="#10-2-AOF-Append-Only-File" class="headerlink" title="10.2 AOF Append Only File"></a>10.2 AOF Append Only File</h3><p>AOF就是以日志的形式来记录每个写操作，将Redis执行过的所有写指令记录下来（不记录读操作），只允许追加文件但不可以改写文件。Redis启动时会读取该文件重新构建数据，也就是说，每次Redis重启时就根据日志文件的内容将写指令从前到后执行一次以完成数据的恢复工作。</p>
+<p>AOF默认不开启，在配置文件redis.conf中将appendonly参数改为yes开启。默认文件名appendonly.aof。</p>
+<p><strong>AOF和RDB同时开启，系统优先读取AOF的数据。</strong></p>
+<p>如遇AOF文件损坏，通过<code>/usr/local/bin/redis-check-aof --fix appendonly.aof</code>进行恢复。</p>
+<ul>
+<li>AOF同步频率设置</li>
+</ul>
+<ol>
+<li>appendfsync always：始终同步，每次Redis的写入都会立刻记入日志，性能较差但数据完整性好。</li>
+<li>appendfsync everysec：每秒同步，每秒记入日志一次，如果宕机，本秒的数据可能丢失。</li>
+<li>appendfsync no：Redis不主动进行同步，把同步时机交给操作系统。</li>
+</ol>
+<ul>
+<li>Rewrite压缩 重写机制</li>
+</ul>
+<p>AOF采用文件追加方式，为了避免出现文件越来越大的情况，新增了重写机制。当AOF文件的大小大于设定的阈值时，Redis会启动AOF文件的内容压缩，只保留可以恢复数据的最小指令集。</p>
+<p>例如：<code>set k1 v1</code>，<code>set k2 v2</code>两条指令，重写为<code>set k1 v1 k2 v2</code>以节约磁盘空间。</p>
+<p>但每次重写是有一定负担的，所以需要满足一定条件才会进行重写：系统载入或上次重写完毕时，Redis会记录此时AOF的大小，设定为base_size，如果Redis的AOF当前大小 &gt;= base_size + base_size * 100%（默认）（也就是当前AOF文件大小是上一次重写后大小的一倍），且当前大小 &gt;= 64MB的情况下，才会进行AOF重写。</p>
+<ul>
+<li>AOF持久化流程</li>
+</ul>
+<ol>
+<li>客户端的写命令会被append追加到AOF缓冲区内。</li>
+<li>AOF缓冲区根据AOF持久化策略[always, everysec, no]将操作sync同步到磁盘的AOF文件中。</li>
+<li>AOF大小超过重写阈值或手动重写时，会对AOF文件rewrite重写，压缩AOF文件容量。</li>
+<li>Redis重启时，load加载AOF文件中的写操作达到数据恢复的目的。</li>
+</ol>
+<ul>
+<li>AOF优势</li>
+</ul>
+<ol>
+<li>备份机制更稳健，丢失数据概率更低。</li>
+<li>可读的日志文本，可以处理误操作。</li>
+</ol>
+<ul>
+<li>AOF劣势</li>
+</ul>
+<ol>
+<li>比起RDB占用更多的磁盘空间。</li>
+<li>恢复备份速度慢。</li>
+<li>每次读写都同步的话，有一定的性能压力。</li>
+</ol>
+<h2 id="11-主从复制"><a href="#11-主从复制" class="headerlink" title="11. 主从复制"></a>11. 主从复制</h2><p>主机数据更新后根据配置和策略，自动同步到备机的Master / Slave机制。Master以写为主，Slave以读为主。</p>
+<p>主从复制能够实现：读写分离，性能扩展，容灾快速恢复。</p>
+<p>实现主从复制：</p>
+<ol>
+<li><code>mkdir ~/myredis</code>创建myredis文件夹</li>
+<li>复制redis.conf配置文件到文件夹中<code>cp /etc/redis.conf ~/myredis/redis.conf</code></li>
+<li>配置一主两从，创建三个配置文件<code>vi redis6379.conf</code></li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">include redis.conf</span><br><span class="line">pidfile /var/run/redis_6379.pid</span><br><span class="line">port 6379</span><br><span class="line">dbfilename dump6379.rdb</span><br><span class="line"><span class="meta">#</span><span class="language-bash">从机的配置文件中需要加上下面这条配置</span></span><br><span class="line">masterauth password</span><br></pre></td></tr></table></figure>
+
+<p>同样方式创建redis6380.conf，redis6381.conf。</p>
+<ol start="4">
+<li>启动三台Redis服务器</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">redis-server redis6379.conf</span><br><span class="line">redis-server redis6380.conf</span><br><span class="line">redis-server redis6381.conf</span><br></pre></td></tr></table></figure>
+
+<p>三个客户端通过端口分别连接</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">redis-cli -p 6379</span><br><span class="line">redis-cli -p 6380</span><br><span class="line">redis-cli -p 6381</span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li><code>slaveof &lt;ip&gt; &lt;port&gt;</code>建立主从关系，<code>slaveof no one</code>解除主从关系。</li>
+</ol>
+<h3 id="11-1-复制原理"><a href="#11-1-复制原理" class="headerlink" title="11.1 复制原理"></a>11.1 复制原理</h3><ol>
+<li>当slave连接上master后，slave向master发送进行数据同步的信息。</li>
+<li>master收到slave发送的同步请求，把master中的数据进行持久化，放到rdb文件中，并发送给slave。</li>
+<li>slave拿到rdb文件，进行读取。</li>
+<li>每次master进行写操作后，和slave进行数据同步。</li>
+</ol>
+<h3 id="11-2-一主两从"><a href="#11-2-一主两从" class="headerlink" title="11.2 一主两从"></a>11.2 一主两从</h3><p>A作为主机，B、C作为从机。</p>
+<p>如果在C宕机的时候，主机添加了数据，C服务器重启后会将主机中的数据从头复制。</p>
+<p>如果A宕机了，B、C还是作为A的从机。主机A重启后，还是拥有B、C两台从机。</p>
+<h3 id="11-3-薪火相传"><a href="#11-3-薪火相传" class="headerlink" title="11.3 薪火相传"></a>11.3 薪火相传</h3><p>一个slave可以是另一个slave的master，可以减轻master的写压力。风险是一旦某个slave宕机，后面的slave都无法备份。</p>
+<h3 id="11-4-哨兵模式-Sentinel"><a href="#11-4-哨兵模式-Sentinel" class="headerlink" title="11.4 哨兵模式 Sentinel"></a>11.4 哨兵模式 Sentinel</h3><p>能够后台监视主机是否故障，如果故障了，根据投票数自动将从库转换为主库。</p>
+<p>实现：</p>
+<ol>
+<li>/myredis目录下新建sentinel.conf文件</li>
+<li>配置哨兵</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sentinel monitor mymaster 127.0.0.1 6379 1</span><br><span class="line"><span class="meta"># </span><span class="language-bash">mymaster：监控对象起的服务器名称</span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">1：至少有多少个哨兵同意迁移的数量</span></span><br><span class="line">sentinel auth-pass mymaster password</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>启动哨兵</li>
+</ol>
+<p><code>redis-sentinel sentinel.conf</code></p>
+<p>主机宕机后，从机根据条件被选举为主机。</p>
+<p>选择条件依次为：</p>
+<ol>
+<li>选择优先级靠前的：redis.conf中默认：replica-priority 100，值越小优先级越高。</li>
+<li>选择偏移量最大的：偏移量是指获得原主机数据最全的。</li>
+<li>选择runid最小的从服务：每个Redis实例启动后都会随机生成一个40位的runid。</li>
+</ol>
+<p>原主机重启后会变成从机。</p>
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2022/05/11/Redis-%E4%BA%8B%E5%8A%A1%E5%92%8C%E9%94%81%E6%9C%BA%E5%88%B6/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+                Ye Yang | 
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://hexo.io/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+  </body>
+</html>
