@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ch">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="yeung">
+
+
+
+
+
+
+
+<title>Redis-集群+应用问题 | YE&#39;s BLOG</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+
+
+
+  <meta name="generator" content="Hexo 5.4.1"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">Ultralight Beam.</a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archives</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/about/">About</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/tag/">Tags</a>
+              </li> 
+                   
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/Redis/">
+                            Redis
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                Redis-集群+应用问题
+            
+            
+        </div>
+        <span class="post-date">
+            05 13, 2022
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h1 id="Redis-集群-应用问题"><a href="#Redis-集群-应用问题" class="headerlink" title="Redis-集群+应用问题"></a>Redis-集群+应用问题</h1><h2 id="12-Redis集群"><a href="#12-Redis集群" class="headerlink" title="12. Redis集群"></a>12. Redis集群</h2><p>Redis集群实现了对Redis的水平扩容，即启动N个Redis节点，将整个数据库分布存储在这N个节点中，每个节点存储总数据的1/N。</p>
+<h3 id="12-1-实现集群"><a href="#12-1-实现集群" class="headerlink" title="12.1 实现集群"></a>12.1 实现集群</h3><ol>
+<li>先删除/myredis目录下的所有rdb文件，再在redis6379.conf配置文件配置redis cluster</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">include redis.conf</span><br><span class="line">pidfile &quot;/var/run/redis_6379.pid&quot; </span><br><span class="line">port 6379</span><br><span class="line">dbfilename &quot;dump6379.rdb&quot;</span><br><span class="line"></span><br><span class="line">cluster-enabled yes #打开集群模式</span><br><span class="line">cluster-config-file nodes-6379.conf #设定节点配置文件名</span><br><span class="line">cluster-node-timeout 15000 #设定节点失联时间，超过该时间（毫秒）集群自动进行主从切换</span><br><span class="line"><span class="meta">#</span><span class="language-bash">从机配置要加主机密码</span></span><br><span class="line">masterauth password</span><br></pre></td></tr></table></figure>
+
+<p>vim替换语句<code>:%s/6379/6380</code>直接把6379改成6380，同样方式创建redis6380，81，89，90，91共六个配置文件。</p>
+<ol start="2">
+<li>启动六个服务器，确保所有Redis实例启动后，nodes-xxxx.conf文件都正常生成。</li>
+<li>cd Redis安装目录下的src文件夹 <code>cd /Library/Redis/redis-6.2.7/src</code></li>
+<li> 创建集群</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">redis-cli --cluster create --cluster-replicas 1 -a password </span><br><span class="line">真实ip地址:6379 真实ip地址:6380 真实ip地址:6381 </span><br><span class="line">真实ip地址:6389 真实ip地址:6390 真实ip地址:6391 </span><br><span class="line"><span class="meta"># </span><span class="language-bash">1代表一个主有一个从，改为别的如2表示一个主有两个从</span></span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>连接到服务器时使用集群策略连接<code>redis-cli -c -p 6379</code>，设置数据会自动切换到相应的写主机。</li>
+</ol>
+<p><code>cluster nodes</code>查看集群状态</p>
+<h3 id="12-2-Redis-cluster如何分配这六个节点？"><a href="#12-2-Redis-cluster如何分配这六个节点？" class="headerlink" title="12.2 Redis cluster如何分配这六个节点？"></a>12.2 Redis cluster如何分配这六个节点？</h3><p>一个集群至少要有三个主节点。配置文件中的–cluster -replicas 1 表示我们希望为集群中的每个主节点创建一个从节点。分配原则尽量保证每个主数据库运行在不同的IP地址，每个从库和主库不在一个IP地址上。</p>
+<h3 id="12-3-slots？"><a href="#12-3-slots？" class="headerlink" title="12.3 slots？"></a>12.3 slots？</h3><p>创建集群时，会提示All 16384 slots covered。</p>
+<p>一个Redis集群包含16384个插槽（hash slots），数据库中的每个键都属于这16384（0～16383）个插槽中的一个。集群通过公式CRC16(key)%16384根据键key来计算它属于哪个slot。</p>
+<p>集群中的每个节点负责处理一部分slots，例如有三个主节点的集群：A负责0～5460号slots，B负责5461～10922号slots，C负责10923～16383号slots。</p>
+<p>由于slot这个机制，不在一个slot下的键值不能使用mset / mget等多键操作，需要通过{}来定义组的概念，通过括号中同样的内容放到一个slot中：<code>mset name&#123;user&#125; ye age&#123;user&#125; 20</code></p>
+<p><code>cluster keyslot &lt;key&gt; </code> 返回键对应的slot</p>
+<p><code>cluster countkeysinslot &lt;slot&gt;</code> 返回slot槽中有几个key（只能看自己插槽中的值，比如6381中的值，通过6380是看不到的）</p>
+<p><code>cluster getkeysinslot &lt;slot&gt; &lt;count&gt;</code> 返回count个slot槽中的key</p>
+<h3 id="12-4-故障恢复"><a href="#12-4-故障恢复" class="headerlink" title="12.4 故障恢复"></a>12.4 故障恢复</h3><ul>
+<li>如果主节点宕机，它的从节点会自动升为主节点（15秒内主节点重启完成，还是主机，否则变为从机）。原主节点恢复后，变为从节点。</li>
+<li>如果某一段slot的主从都宕机了，分为两种情况：</li>
+</ul>
+<ol>
+<li>redis.conf中的cluster-require-full-coverage为yes，那么整个集群服务都挂掉。</li>
+<li>redis.conf中的cluster-require-full-coverage为no，那么该段slot数据全部不能使用，也无法存储。</li>
+</ol>
+<h2 id="13-应用问题"><a href="#13-应用问题" class="headerlink" title="13. 应用问题"></a>13. 应用问题</h2><h3 id="13-1-缓存穿透"><a href="#13-1-缓存穿透" class="headerlink" title="13.1 缓存穿透"></a>13.1 缓存穿透</h3><ul>
+<li>问题描述：</li>
+</ul>
+<p>查询key对应的数据在数据库中并不存在，每次针对此key的请求都无法从缓存中获取，导致数据库收到大量请求，从而压垮数据库。比如用一个不存在的用户id获取用户信息，无论是在Redis缓存中还是Sql数据库中都没有，黑客可以利用此漏洞瘫痪数据库。</p>
+<ul>
+<li>解决方案：</li>
+</ul>
+<ol>
+<li>对空值进行缓存：如果一个查询返回的数据为空，无论数据是否不存在，都把这个null空结果进行缓存，同时设置一个很短的过期时间（不超过5分钟）。这个方法只能作为一个临时解决方案。</li>
+<li>设置可访问的名单（白名单）：使用bitmaps类型定义一个可以访问的名单，名单id作为bitmaps的偏移量，每次访问和bitmaps里面的id进行比较 ，如果访问id不在bitmaps里面，进行拦截，不允许访问。这个方法的缺点是，每次查询都需要访问这个bitmaps，所以效率不高。</li>
+<li><strong>布隆过滤器</strong>：布隆过滤器是一个很长的二进制向量（位图）和一系列随机映射函数（哈希函数）。可以用于检索一个元素是否在一个集合中。它的优点是空间效率和查询时间都远超一般算法，缺点是有一定的误识别概率和删除困难。布隆过滤器将所有可能存在的数据哈希到一个足够大的bitmaps中，一个一定不存在的数据会被这个bitmaps拦截，从而避免对底层存储系统的查询压力。</li>
+</ol>
+<h3 id="13-2-缓存击穿"><a href="#13-2-缓存击穿" class="headerlink" title="13.2 缓存击穿"></a>13.2 缓存击穿</h3><ul>
+<li>问题描述：</li>
+</ul>
+<p>key对应的数据在数据库中存在，但在Redis中过期，此时若有大量并发请求查询这个key，这些请求发现缓存过期了，就会从数据库加载数据并回设到缓存中，这些大并发的请求可能瞬间瘫痪数据库，称为缓存击穿。</p>
+<ul>
+<li>解决方案：</li>
+</ul>
+<ol>
+<li>预先设置热门数据：在Redis高峰访问前，把一些热门数据提前存入到Redis里面，延长这些热门数据key的过期时长。</li>
+<li>实时调整：现场监控哪些数据热门，实时调整key的过期时长。</li>
+<li>使用锁：如果查询Redis返回结果为空，设置一个排他锁，如果操作失败，证明有其他线程在load db，当前线程睡眠一段时间后再重试get key的操作，直到成功并回设缓存，最后删除排他锁。但是使用锁效率会很低。</li>
+</ol>
+<h3 id="13-3-缓存雪崩"><a href="#13-3-缓存雪崩" class="headerlink" title="13.3 缓存雪崩"></a>13.3 缓存雪崩</h3><ul>
+<li>问题描述：</li>
+</ul>
+<p>key对应的数据在数据库中存在，但在极短的时间段内，大量的key同时过期，而且有大量并发请求查询这些过期的key，导致缓存雪崩。缓存雪崩和缓存击穿的区别在于，雪崩是指很多key同时过期，而击穿是某一个key过期。</p>
+<ul>
+<li>解决方案：</li>
+</ul>
+<ol>
+<li>构建多级缓存架构：Nginx+Redis+其他缓存。</li>
+<li>使用锁或队列：保证不会有大量线程对数据库一次性进行读写，从而避免失效时大量的并发请求落到底层存储系统上，但不适用于高并发情况，因为效率太低。</li>
+<li>设置过期标志更新缓存：记录缓存数据是否过期，设置一个提前量，如果快要过期了，通知其他线程在后台去更新缓存。</li>
+<li>将缓存失效时间分散开：在原有的失效时间基础上加上一个随机值，比如随机多加1-5分钟的失效时间，这样每一个缓存的过期时间的重复率就会降低，避免引发集体失效的事件。</li>
+</ol>
+<h3 id="13-4-锁"><a href="#13-4-锁" class="headerlink" title="13.4 锁"></a>13.4 锁</h3><p>Redis中使用<code>set &lt;key&gt; &lt;value&gt; nx ex &lt;second&gt;</code>进行上锁，上锁的同时设置过期时间，避免出现只设置了锁，但在设置过期时间之前服务器宕机，导致锁一直不释放的问题。</p>
+<p><code>del &lt;key&gt;</code>删除键相当于释放锁。</p>
+<p>Jedis代码实现锁：</p>
+<p>现在Redis库中有一个key为num，需求是每一次操作将num的值+1，每次操作都要加锁，代码如下。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">RedisTestController</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> RedisTemplate redisTemplate;</span><br><span class="line">  </span><br><span class="line">    <span class="meta">@GetMapping(&quot;testLock&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testLock</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="comment">// 1. 获取锁 setnx 3秒之后锁被自动释放</span></span><br><span class="line">        <span class="type">Boolean</span> <span class="variable">lock</span> <span class="operator">=</span> redisTemplate.opsForValue().setIfAbsent(<span class="string">&quot;lock&quot;</span>, <span class="string">&quot;l1&quot;</span>,<span class="number">3</span>, TimeUnit.SECONDS);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 2. 获取锁成功，查询num的值</span></span><br><span class="line">        <span class="keyword">if</span>(lock)&#123;</span><br><span class="line">            <span class="type">Object</span> <span class="variable">value</span> <span class="operator">=</span> redisTemplate.opsForValue().get(<span class="string">&quot;num&quot;</span>);</span><br><span class="line">            <span class="comment">// 2.1 判断num的值，如果为空直接return</span></span><br><span class="line">            <span class="keyword">if</span>(StringUtils.isEmpty(value)) <span class="keyword">return</span>;</span><br><span class="line">            <span class="comment">// 2.2 num不为空，转换成int</span></span><br><span class="line">            <span class="type">int</span> <span class="variable">num</span> <span class="operator">=</span> Integer.parseInt(value+<span class="string">&quot;&quot;</span>);</span><br><span class="line">            <span class="comment">// 2.3 把Redis中的num加1</span></span><br><span class="line">            redisTemplate.opsForValue().set(<span class="string">&quot;num&quot;</span>,++num);</span><br><span class="line">            <span class="comment">// 2.4 释放锁，del</span></span><br><span class="line">            redisTemplate.delete(<span class="string">&quot;lock&quot;</span>);</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="comment">// 3. 获取锁失败，每隔0.1秒再获取</span></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Thread.sleep(<span class="number">100</span>);</span><br><span class="line">                testLock();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这种简单的实现还有可能出现问题：锁的误删。</p>
+<p>即，现在有A、B两个操作，设置锁的过期时间为10秒。A先开始操作，此时A获得了锁，但在A具体操作时服务器发生卡顿，而且卡顿时间大于10秒，那么在10秒后，锁就自动释放了。这样，B就抢到了锁，并开始进行具体操作，在B进行操作时，A的服务器反应过来进行操作，并在最后手动释放锁，这样就把B的锁释放了。这就是锁的误删。</p>
+<p>解决方法：UUID防止误删。</p>
+<ol>
+<li>使用uuid标识不同的操作，<code>set lock uuid nx ex 10</code>。</li>
+<li>释放锁的时候，首先判断当前uuid和要释放的锁的uuid是否一样。</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@GetMapping(&quot;testLock&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testLock</span><span class="params">()</span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="type">String</span> <span class="variable">uuid</span> <span class="operator">=</span> UUID.randomUUID().toString();</span><br><span class="line">  </span><br><span class="line">    <span class="comment">// 1. 获取锁 setnx 3秒之后锁被自动释放</span></span><br><span class="line">    <span class="type">Boolean</span> <span class="variable">lock</span> <span class="operator">=</span> redisTemplate.opsForValue().setIfAbsent(<span class="string">&quot;lock&quot;</span>, uuid,<span class="number">3</span>, TimeUnit.SECONDS);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2. 获取锁成功，查询num的值</span></span><br><span class="line">    <span class="keyword">if</span>(lock)&#123;</span><br><span class="line">        <span class="type">Object</span> <span class="variable">value</span> <span class="operator">=</span> redisTemplate.opsForValue().get(<span class="string">&quot;num&quot;</span>);</span><br><span class="line">        <span class="comment">// 2.1 判断num的值，如果为空直接return</span></span><br><span class="line">        <span class="keyword">if</span>(StringUtils.isEmpty(value)) <span class="keyword">return</span>;</span><br><span class="line">        <span class="comment">// 2.2 num不为空，转换成int</span></span><br><span class="line">        <span class="type">int</span> <span class="variable">num</span> <span class="operator">=</span> Integer.parseInt(value+<span class="string">&quot;&quot;</span>);</span><br><span class="line">        <span class="comment">// 2.3 把Redis中的num加1</span></span><br><span class="line">        redisTemplate.opsForValue().set(<span class="string">&quot;num&quot;</span>,++num);</span><br><span class="line">        <span class="comment">// 2.4 释放锁，del</span></span><br><span class="line">        <span class="comment">// 判断uuid是否一样</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">lockUUID</span> <span class="operator">=</span> (String) redisTemplate.opsForValue().get(<span class="string">&quot;lock&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span>(uuid.equals(lockUUID))&#123;</span><br><span class="line">            redisTemplate.delete(<span class="string">&quot;lock&quot;</span>);</span><br><span class="line">        &#125;            </span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="comment">// 3. 获取锁失败，每隔0.1秒再获取</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Thread.sleep(<span class="number">100</span>);</span><br><span class="line">            testLock();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>区别在于先生成一个uuid，将键lock存入Redis时，值设置为它专属的uuid，释放锁之前先进行判断。</p>
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2022/05/12/Redis-%E6%8C%81%E4%B9%85%E5%8C%96%E6%93%8D%E4%BD%9C-%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+                Ye Yang | 
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://hexo.io/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+  </body>
+</html>
