@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ch">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="yeung">
+
+
+
+
+
+
+
+<title>JUC-volatile | YE&#39;s BLOG</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+
+
+
+  <meta name="generator" content="Hexo 5.4.1"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">Ultralight Beam.</a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archives</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/about/">About</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/tag/">Tags</a>
+              </li> 
+                   
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/JUC/">
+                            JUC
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                JUC-volatile
+            
+            
+        </div>
+        <span class="post-date">
+            05 28, 2022
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h1 id="4-共享模型之内存"><a href="#4-共享模型之内存" class="headerlink" title="4. 共享模型之内存"></a>4. 共享模型之内存</h1><h2 id="4-1-Java内存模型-JMM"><a href="#4-1-Java内存模型-JMM" class="headerlink" title="4.1 Java内存模型 JMM"></a>4.1 Java内存模型 JMM</h2><p>Java Memory Model，定义了主存（所有线程都共享的数据，如静态成员变量、成员变量）、工作内存（每个线程私有的数据，即局部变量）这两个抽象概念。</p>
+<p>JMM体现在以下三个方面：</p>
+<ol>
+<li>原子性：保证指令不会受到线程上下文切换的影响。（第三章的Monitor就是保证临界区代码的原子性）</li>
+<li>可见性：保证指令不会受CPU缓存的影响。</li>
+<li>有序性：保证指令不会受CPU指令并行优化的影响。</li>
+</ol>
+<h2 id="4-2-可见性"><a href="#4-2-可见性" class="headerlink" title="4.2 可见性"></a>4.2 可见性</h2><h3 id="4-2-1-volatile关键字"><a href="#4-2-1-volatile关键字" class="headerlink" title="4.2.1 volatile关键字"></a>4.2.1 volatile关键字</h3><p>现有一段代码，当静态变量run=true时，线程t不断执行。1秒后主线程将变量改为false，试图停止线程t。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="type">boolean</span> <span class="variable">run</span> <span class="operator">=</span> <span class="literal">true</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">Thread</span>(()-&gt;&#123;</span><br><span class="line">        <span class="keyword">while</span>(run)&#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;).start();</span><br><span class="line"></span><br><span class="line">    Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">    log.debug(<span class="string">&quot;stop t1&quot;</span>);</span><br><span class="line">    run = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但是运行后发现线程t并不会停下来。</p>
+<p>原因是：</p>
+<ol>
+<li>初始状态，线程t从主内存中读取了静态变量run的值到自己的工作内存中。</li>
+<li>因为t频繁从主内存中读取run的值，JIT即时编译器会将run的值缓存至自己工作内存中的高速缓存中，减少对主存中run的访问，提高效率。</li>
+<li>1秒后，主线程修改run的值，同步至主存。而t是从自己的工作内存中读取这个变量，导致结果永远是修改前的值。</li>
+</ol>
+<p><strong>解决方法：</strong></p>
+<p>volatile关键字。用来修饰成员变量和静态成员变量，可以避免线程从自己的工作缓存中查找变量的值，必须到主存中获取它的值，线程操作volatile变量都是直接操作主存。</p>
+<p><strong>volatile能保证可见性，但不保证原子性。因此volatile适用于一写线程多读线程的场景。</strong></p>
+<h3 id="4-2-2-volatile改进两阶段终止模式"><a href="#4-2-2-volatile改进两阶段终止模式" class="headerlink" title="4.2.2 volatile改进两阶段终止模式"></a>4.2.2 volatile改进两阶段终止模式</h3><p>设置一个volatile修饰的stopFlag标记，就不用考虑打断标记被清除的问题了。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">twoPhaseTermination</span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Thread monitorThread;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">volatile</span> <span class="type">boolean</span> <span class="variable">stopFlag</span> <span class="operator">=</span> <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">start</span><span class="params">()</span>&#123;</span><br><span class="line">        monitorThread = <span class="keyword">new</span> <span class="title class_">Thread</span>(()-&gt;&#123;</span><br><span class="line">            <span class="keyword">while</span>(<span class="literal">true</span>)&#123;</span><br><span class="line">                <span class="keyword">if</span>(stopFlag)&#123;</span><br><span class="line">                    log.debug(<span class="string">&quot;料理后事...&quot;</span>);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">                    log.debug(<span class="string">&quot;执行监控记录...&quot;</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,<span class="string">&quot;monitor&quot;</span>);</span><br><span class="line"></span><br><span class="line">        monitorThread.start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">stop</span><span class="params">()</span>&#123;</span><br><span class="line">        stopFlag = <span class="literal">true</span>;</span><br><span class="line">        <span class="comment">//如果在睡眠过程中别的线程调用stop方法，希望不等待睡眠，尽快结束，就调用interrupt打断</span></span><br><span class="line">        monitorThread.interrupt();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-2-3-犹豫模式-Balking"><a href="#4-2-3-犹豫模式-Balking" class="headerlink" title="4.2.3 犹豫模式 Balking"></a>4.2.3 犹豫模式 Balking</h3><p>以两阶段终止模式中的代码为例，如果多次调用<code>start()</code>方法，会创建多个线程来执行，这样是没有意义的。</p>
+<p>可以设置一个布尔值started作为标记，提示是否已经调用过这个方法了。而且要用synchronized加锁，不能只用volatile，因为这是原子性的问题，不是可见性问题。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">volatile</span> <span class="type">boolean</span> <span class="variable">started</span> <span class="operator">=</span> <span class="literal">false</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">start</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (started)&#123;</span><br><span class="line">        <span class="keyword">synchronized</span> (<span class="built_in">this</span>)&#123;</span><br><span class="line">            <span class="keyword">if</span> (started)&#123;</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    started = <span class="literal">true</span>;</span><br><span class="line">    monitorThread = <span class="keyword">new</span> <span class="title class_">Thread</span>(()-&gt;&#123;&#125;,<span class="string">&quot;monitor&quot;</span>);</span><br><span class="line">  	monitorThread.start();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-3-有序性"><a href="#4-3-有序性" class="headerlink" title="4.3 有序性"></a>4.3 有序性</h2><p>JVM会在不影响正确性的前提下，调整语句的执行顺序。这种特性称为指令重排。</p>
+<p>在多线程下，指令重排会影响正确性。</p>
+<p>例：Result是一个对象，有一个属性r1用来保存结果，两个线程分别执行m1，m2方法，r1的值有几种可能结果？</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="variable">num</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line"><span class="type">boolean</span> <span class="variable">ready</span> <span class="operator">=</span> <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//线程1执行此方法</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">m1</span><span class="params">(Result r)</span>&#123;</span><br><span class="line">  <span class="keyword">if</span>(ready)&#123;</span><br><span class="line">    r.r1 = num + num;</span><br><span class="line">  &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    r.r1 = <span class="number">1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//线程2执行此方法</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">m2</span><span class="params">(Result r)</span>&#123;</span><br><span class="line">  num = <span class="number">2</span>;</span><br><span class="line">  ready = <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结果有三种：</p>
+<ol>
+<li>r.r1 = 1。线程1先执行，此时ready = false，结果为1。</li>
+<li>r.r1 = 4。线程2先执行到ready = true，线程1进入if分支，此时num = 2，所以结果为4。</li>
+<li>r.r1 = 0。线程2执行时发生指令重排，ready = true，此时切换到线程1进入if分支，此时num = 0，所以结果为0。</li>
+</ol>
+<p><strong>使用volatile关键字禁用指令重排。</strong>此例中用volatile修饰ready变量。</p>
+<h2 id="4-4-volatile原理"><a href="#4-4-volatile原理" class="headerlink" title="4.4 volatile原理"></a>4.4 volatile原理</h2><p>volatile的底层实现原理是内存屏障Memory Barrier。</p>
+<ul>
+<li>对volatile变量的写指令后会加入写屏障。</li>
+<li>对volatile变量的读指令前会加入读屏障。</li>
+</ul>
+<h3 id="4-4-1-如何保证可见性"><a href="#4-4-1-如何保证可见性" class="headerlink" title="4.4.1 如何保证可见性"></a>4.4.1 如何保证可见性</h3><ul>
+<li>写屏障 sfence / store barrier 保证在该屏障之前，对共享变量的改动都同步到主存中。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">m2</span><span class="params">(Result r)</span>&#123;</span><br><span class="line">  num = <span class="number">2</span>;</span><br><span class="line">  ready = <span class="literal">true</span>; <span class="comment">//ready被volatile修饰，赋值时带写屏障</span></span><br><span class="line">  <span class="comment">//写屏障，在这一行之前的所有改动（赋值）被同步到主存中</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>读屏障 lfence / load barrier 保证在该屏障之后，对共享变量的读取加载的是主存中的最新数据。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">m1</span><span class="params">(Result r)</span>&#123;</span><br><span class="line">  <span class="comment">//读屏障</span></span><br><span class="line">  <span class="comment">//ready被volatile修饰，读取时带读屏障</span></span><br><span class="line">  <span class="keyword">if</span>(ready)&#123;</span><br><span class="line">    r.r1 = num + num;</span><br><span class="line">  &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    r.r1 = <span class="number">1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-4-2-如何保证有序性"><a href="#4-4-2-如何保证有序性" class="headerlink" title="4.4.2 如何保证有序性"></a>4.4.2 如何保证有序性</h3><p>同样是通过读屏障、写屏障来保证有序性。</p>
+<p>写屏障之前的代码不会被重排到写屏障后面，读屏障之后的代码不会被重排到读屏障之前。</p>
+<p><strong>volatile保证指令不重排和内存的可见性，但不保证原子性，不能解决指令交错：</strong></p>
+<ol>
+<li>写屏障仅仅保证之后的的读能够读到最新的结果，但如果指令交错，导致读发生在写之前，还是不能读到最新结果。</li>
+<li>有序性的保证也只是保证了本线程内相关代码不被重排序。</li>
+</ol>
+<h3 id="4-4-3-单例模式DCL问题"><a href="#4-4-3-单例模式DCL问题" class="headerlink" title="4.4.3 单例模式DCL问题"></a>4.4.3 单例模式DCL问题</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Singleton</span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">Singleton</span><span class="params">()</span>&#123;&#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">Singleton</span> <span class="variable">INSTANCE</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title function_">getInstance</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(INSTANCE == <span class="literal">null</span>)&#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (Singleton.class)&#123;</span><br><span class="line">                <span class="keyword">if</span>(INSTANCE == <span class="literal">null</span>)&#123;</span><br><span class="line">                    INSTANCE = <span class="keyword">new</span> <span class="title class_">Singleton</span>();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> INSTANCE;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其实这种DCL的代码在多线程的环境下是有问题的：</p>
+<p>在字节码的层面上，由于指令重排，可能会发生线程T1调用getInstance方法，JVM把一个还没有调用构造方法的对象引用赋值给静态变量INSTANCE的情况。这样一来，在另一个线程T2调用方法时，获取INSTANCE引用不为空，就直接使用这个对象了，但实际上这是一个没有完成初始化的对象。</p>
+<p>解决方法很简单：<strong>用volatile修饰静态变量INSTANCE。</strong></p>
+<p>通过写屏障，保证在给INSTANCE赋值之前会先调用构造方法，从而解决这个问题。</p>
+<h3 id="4-4-4-单例模式线程安全常见问题"><a href="#4-4-4-单例模式线程安全常见问题" class="headerlink" title="4.4.4 单例模式线程安全常见问题"></a>4.4.4 单例模式线程安全常见问题</h3><p>单例模式有很多实现方法，饿汉式、懒汉式、静态内部类、枚举，每种实现都有可能出现线程安全问题。</p>
+<p>实现1：饿汉式</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//问题1:为什么加final --&gt; 防止子类不适当覆盖父类方法破坏单例</span></span><br><span class="line"><span class="comment">//问题2:如果实现了序列化Serializable接口，还需要做什么来防止反序列化破坏单例 --&gt; 重写readResolve方法</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Singleton</span> <span class="keyword">implements</span> <span class="title class_">Serializable</span>&#123;</span><br><span class="line">    </span><br><span class="line">  	<span class="comment">//问题3:为什么设置为私有？是否能防止反射创建新的实例？</span></span><br><span class="line">  	<span class="comment">//不设置为私有，别的类就可以无限创建对象，就不是单例了。不能防止反射创建新的实例。</span></span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">Singleton</span><span class="params">()</span>&#123;&#125;</span><br><span class="line">    </span><br><span class="line">  	<span class="comment">//问题4:这样初始化能否保证单例对象创建时的线程安全？</span></span><br><span class="line">  	<span class="comment">//能。静态成员变量初始化操作在类加载器上，可以相信JVM</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Singleton</span> <span class="variable">INSTANCE</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Singleton</span>();</span><br><span class="line">    </span><br><span class="line">  	<span class="comment">//问题5:为什么提供静态方法而不是将INSTANCE设置为public？</span></span><br><span class="line">  	<span class="comment">//用方法就是提供了更好的封装性，创建单例对象时有更多的控制，可以提供泛型的支持</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title function_">getInstance</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> INSTANCE;</span><br><span class="line">    &#125;</span><br><span class="line">  	</span><br><span class="line">  	<span class="comment">// 当用反序列化创建对象时，会调用readResolve()方法，因此直接重写这个方法，让它返回我们创建的对象，</span></span><br><span class="line">  	<span class="comment">// 防止破坏单例</span></span><br><span class="line">  	<span class="keyword">public</span> Object <span class="title function_">readResolve</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> INSTANCE;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>实现2：枚举</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//问题1:枚举单例是如何限制实例个数的？</span></span><br><span class="line"><span class="comment">//枚举类里定义的枚举对象定义时有几个，将来就有几个对象，相当于是枚举类里的静态成员变量</span></span><br><span class="line"><span class="comment">//问题2:枚举单例在创建时是否有并发问题？ --&gt; 没有，因为它是静态成员变量</span></span><br><span class="line"><span class="comment">//问题3:枚举单例能否被反射破坏单例？ --&gt; 不能</span></span><br><span class="line"><span class="comment">//问题4:枚举单例能否被反序列化破坏单例？ --&gt; 不能</span></span><br><span class="line"><span class="comment">//问题5:枚举单例属于懒汉式还是饿汉式？ --&gt; 饿汉式</span></span><br><span class="line"><span class="comment">//问题6:枚举单例如果希望加入一些单例创建时的初始化逻辑该怎么做？ --&gt; 加一个构造方法</span></span><br><span class="line"><span class="keyword">enum</span> <span class="title class_">Singleton</span>&#123;</span><br><span class="line">  INSTANCE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>实现3：懒汉式</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Singleton</span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">Singleton</span><span class="params">()</span>&#123;&#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">Singleton</span> <span class="variable">INSTANCE</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">    <span class="comment">//分析这里的线程安全问题，有什么缺点？</span></span><br><span class="line">  	<span class="comment">//这是可以保证线程安全的，因为synchronized加在静态方法上，相当于锁加在Singleton.class上</span></span><br><span class="line">  	<span class="comment">//缺点是锁的范围大，每次调用都要加锁，性能低</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> Singleton <span class="title function_">getInstance</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (INSTANCE != <span class="literal">null</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> INSTANCE;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">return</span> <span class="variable">INSTANCE</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Singleton</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>实现4：DCL懒汉式</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Singleton</span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">Singleton</span><span class="params">()</span>&#123;&#125;</span><br><span class="line">		<span class="comment">//问题1:为什么加volatile？</span></span><br><span class="line">  	<span class="comment">//防止同步代码块里发生指令重排序</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">volatile</span> <span class="type">Singleton</span> <span class="variable">INSTANCE</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">  	<span class="comment">//问题2:对比实现3，这样做的意义？</span></span><br><span class="line">  	<span class="comment">//锁的范围小了，第一次调用会进入同步代码块，后续调用只需进行一次判断就可以return，性能更优越</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title function_">getInstance</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (INSTANCE != <span class="literal">null</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> INSTANCE;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">synchronized</span> (Singleton.class)&#123;</span><br><span class="line">          	<span class="comment">//问题3:为什么前面if判断过了这里还要判断一次？</span></span><br><span class="line">          	<span class="comment">//防止首次创建INSTANCE对象时出现多线程并发，重复创建对象的问题</span></span><br><span class="line">            <span class="keyword">if</span> (INSTANCE != <span class="literal">null</span>)&#123;</span><br><span class="line">                <span class="keyword">return</span> INSTANCE;</span><br><span class="line">            &#125;</span><br><span class="line">            INSTANCE = <span class="keyword">new</span> <span class="title class_">Singleton</span>();</span><br><span class="line">            <span class="keyword">return</span> INSTANCE;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>实现5：静态内部类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Singleton</span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">Singleton</span><span class="params">()</span>&#123;&#125;</span><br><span class="line">    </span><br><span class="line">  	<span class="comment">//问题1:属于懒汉式还是饿汉式？</span></span><br><span class="line">  	<span class="comment">//懒汉式。因为类加载本身就是懒惰的，只有这个类被调用的时候才会被加载</span></span><br><span class="line">  	<span class="comment">//所以只有getInstance方法被调用时，LazyHolder类才会被加载，Instance才会被初始化</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">LazyHolder</span>&#123;</span><br><span class="line">        <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Singleton</span> <span class="variable">INSTANCE</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Singleton</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">  	<span class="comment">//问题2:创建时是否有并发问题？ --&gt; 不会，类加载对静态变量的赋值操作是由JVM来保证线程安全的。</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title function_">getInstance</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> LazyHolder.INSTANCE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+                <div class="icon arrow-left"></div>
+                <div class="post-link">
+                    <a href="/2022/05/29/JUC-%E6%97%A0%E9%94%81%E5%B9%B6%E5%8F%91CAS-%E5%AE%9E%E7%8E%B0CAS%E7%9A%84%E5%B7%A5%E5%85%B7%E7%B1%BB/">Prev</a>
+                </div>
+            
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2022/05/26/JUC-ReentrantLock/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+                Ye Yang | 
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://hexo.io/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+  </body>
+</html>
