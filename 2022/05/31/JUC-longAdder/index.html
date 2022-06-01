@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ch">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="yeung">
+
+
+
+
+
+
+
+<title>JUC-longAdder | YE&#39;s BLOG</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+
+
+
+  <meta name="generator" content="Hexo 5.4.1"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">Ultralight Beam.</a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archives</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/about/">About</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/tag/">Tags</a>
+              </li> 
+                   
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/JUC/">
+                            JUC
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                JUC-longAdder
+            
+            
+        </div>
+        <span class="post-date">
+            05 31, 2022
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h1 id="JUC-longAdder"><a href="#JUC-longAdder" class="headerlink" title="JUC-longAdder"></a>JUC-longAdder</h1><h2 id="5-共享模型之无锁"><a href="#5-共享模型之无锁" class="headerlink" title="5. 共享模型之无锁"></a>5. 共享模型之无锁</h2><h3 id="5-2-实现CAS的工具类"><a href="#5-2-实现CAS的工具类" class="headerlink" title="5.2 实现CAS的工具类"></a>5.2 实现CAS的工具类</h3><h4 id="5-2-5-原子累加器LongAdder"><a href="#5-2-5-原子累加器LongAdder" class="headerlink" title="5.2.5 原子累加器LongAdder"></a>5.2.5 原子累加器LongAdder</h4><p>原子累加器，就是对整数做累加操作，虽然AtomicInteger / AtomicLong也可以完成累加操作，但在JDK8后新增了几个专门做累加的类：LongAdder / LongAccumulator，性能要更高。</p>
+<p>例：AtomicLong和LongAdder做对比，4个线程每个线程自增50万次，最终结果应为200万。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test1</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">            demo(</span><br><span class="line">                    ()-&gt; <span class="keyword">new</span> <span class="title class_">AtomicLong</span>(<span class="number">0</span>),</span><br><span class="line">                    (adder) -&gt; adder.getAndIncrement()</span><br><span class="line">            );</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">            demo(</span><br><span class="line">                    ()-&gt; <span class="keyword">new</span> <span class="title class_">LongAdder</span>(),</span><br><span class="line">                    (adder) -&gt; adder.increment()</span><br><span class="line">            );</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> &lt;T&gt; <span class="keyword">void</span> <span class="title function_">demo</span><span class="params">(Supplier&lt;T&gt; adderSupplier, Consumer&lt;T&gt; action)</span>&#123;</span><br><span class="line">        <span class="type">T</span> <span class="variable">adder</span> <span class="operator">=</span> adderSupplier.get();</span><br><span class="line">        List&lt;Thread&gt; ts = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">        <span class="comment">//4个线程 每个线程自增50万次</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">4</span>; i++) &#123;</span><br><span class="line">            ts.add(<span class="keyword">new</span> <span class="title class_">Thread</span>(()-&gt;&#123;</span><br><span class="line">                <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> <span class="number">0</span>; j &lt; <span class="number">500000</span>; j++) &#123;</span><br><span class="line">                    action.accept(adder);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">long</span> <span class="variable">start</span> <span class="operator">=</span> System.nanoTime();</span><br><span class="line">        ts.forEach(Thread::start);</span><br><span class="line">        ts.forEach(thread -&gt; &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                thread.join();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        <span class="type">long</span> <span class="variable">end</span> <span class="operator">=</span> System.nanoTime();</span><br><span class="line">        System.out.println(adder+<span class="string">&quot; cost:&quot;</span>+(end-start)/<span class="number">1000000</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结果：</p>
+<p><img src="img1.png" alt="img1"></p>
+<p>性能差距十分明显。LongAdder提升性能的原因很简单，就是在有竞争的时候，设置多个共享变量（累加单元），如线程T0累加在Cell[0]上，线程T1累加在Cell[1]上，最后将结果汇总，从而降低CAS重试失败的可能性，达到提升性能的效果。竞争越大就设置越多个累加单元，但不会超过CPU的核心数。</p>
+<h4 id="5-2-6-LongAdder源码"><a href="#5-2-6-LongAdder源码" class="headerlink" title="5.2.6 LongAdder源码"></a>5.2.6 LongAdder源码</h4><p>LongAdder类有几个关键域：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//累加单元数组，懒惰初始化</span></span><br><span class="line"><span class="keyword">transient</span> <span class="keyword">volatile</span> Cell[] cells;</span><br><span class="line"><span class="comment">//基础值，如果没有竞争，就用cas累加这个域</span></span><br><span class="line"><span class="keyword">transient</span> <span class="keyword">volatile</span> <span class="type">long</span> base;</span><br><span class="line"><span class="comment">//在cells创建或扩容时，置为1，表示加锁</span></span><br><span class="line"><span class="keyword">transient</span> <span class="keyword">volatile</span> <span class="type">int</span> cellsBusy;</span><br></pre></td></tr></table></figure>
+
+<h5 id="5-2-6-1-缓存行伪共享"><a href="#5-2-6-1-缓存行伪共享" class="headerlink" title="5.2.6.1 缓存行伪共享"></a>5.2.6.1 缓存行伪共享</h5><p>LongAdder中Cell（累加单元）类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@sun</span>.misc.Contended <span class="comment">//这个注解用来防止缓存行伪共享</span></span><br><span class="line"> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Cell</span> &#123;</span><br><span class="line">   <span class="keyword">volatile</span> <span class="type">long</span> value;</span><br><span class="line">   Cell(<span class="type">long</span> x) &#123; value = x; &#125;</span><br><span class="line">   </span><br><span class="line">   <span class="comment">//最重要的方法，用CAS进行累加</span></span><br><span class="line">   <span class="keyword">final</span> <span class="type">boolean</span> <span class="title function_">cas</span><span class="params">(<span class="type">long</span> cmp, <span class="type">long</span> val)</span> &#123;</span><br><span class="line">       <span class="keyword">return</span> UNSAFE.compareAndSwapLong(<span class="built_in">this</span>, valueOffset, cmp, val);</span><br><span class="line">   &#125;</span><br><span class="line">   </span><br><span class="line">   <span class="comment">//省略其他方法</span></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>简单来说，每个CPU核心有自己的一级缓存、二级缓存，核心之间有共享的三级缓存，三级缓存之下才是内存。因为CPU从缓存中读取和从内存中读取速度差异很大，所以需要靠预读数据到缓存来提升效率。</p>
+<p><strong>缓存以缓存行为单位</strong>，每个缓存行对应一块内存，大小一般是64byte = 8long。缓存的存在导致数据副本的产生，即同一份数据会缓存在不同核心的缓存行中。CPU要保持数据的一致性，所以如果某个CPU核心更改了数据，其他CPU核心中该数据所在的整个缓存行都会失效。</p>
+<p>例：</p>
+<p><img src="img2.PNG" alt="img2"></p>
+<p>因为Cell是数组形式，在内存中是连续存储的，一个Cell为24字节（16字节的对象头和8字节的value），因此一个缓存行中可以存下2个Cell对象。</p>
+<p>那么如果Core0要修改Cell[0]，Core1要修改Cell[1]，无论谁修改成功，都会让另一个CPU核心的缓存行失效。</p>
+<p>通过<code>@sun.misc.Contended</code>注解，让使用此注解的对象或字段前后各增加128字节的padding，从而让CPU预读对象至缓存时占用不同的缓存行，避免出现其他核心的缓存行失效的情况。</p>
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+                <div class="icon arrow-left"></div>
+                <div class="post-link">
+                    <a href="/2022/05/31/JUC-%E4%B8%8D%E5%8F%AF%E5%8F%98%E7%B1%BB/">Prev</a>
+                </div>
+            
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2022/05/29/JUC-%E6%97%A0%E9%94%81%E5%B9%B6%E5%8F%91CAS-%E5%AE%9E%E7%8E%B0CAS%E7%9A%84%E5%B7%A5%E5%85%B7%E7%B1%BB/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+                Ye Yang | 
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://hexo.io/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+  </body>
+</html>
