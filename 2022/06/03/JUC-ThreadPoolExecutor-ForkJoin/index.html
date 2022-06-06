@@ -14,7 +14,7 @@
 
 
 
-<title>JUC-ThreadPoolExecutor | YE&#39;s BLOG</title>
+<title>JUC-ThreadPoolExecutor+ForkJoin | YE&#39;s BLOG</title>
 
 
 
@@ -118,7 +118,7 @@
         <div class="post-title">
             
             
-                JUC-ThreadPoolExecutor
+                JUC-ThreadPoolExecutor+ForkJoin
             
             
         </div>
@@ -133,7 +133,7 @@
     </div>
 </div>
     <div class="post-content">
-    <h1 id="JUC-ThreadPoolExecutor"><a href="#JUC-ThreadPoolExecutor" class="headerlink" title="JUC-ThreadPoolExecutor"></a>JUC-ThreadPoolExecutor</h1><h2 id="7-并发工具：线程池"><a href="#7-并发工具：线程池" class="headerlink" title="7.并发工具：线程池"></a>7.并发工具：线程池</h2><h3 id="7-2-ThreadPoolExecutor"><a href="#7-2-ThreadPoolExecutor" class="headerlink" title="7.2 ThreadPoolExecutor"></a>7.2 ThreadPoolExecutor</h3><p>ThreadPoolExecutor是JDK提供的线程池实现，实现了ExecutorService接口。</p>
+    <h1 id="JUC-ThreadPoolExecutor-ForkJoin"><a href="#JUC-ThreadPoolExecutor-ForkJoin" class="headerlink" title="JUC-ThreadPoolExecutor+ForkJoin"></a>JUC-ThreadPoolExecutor+ForkJoin</h1><h2 id="7-并发工具：线程池"><a href="#7-并发工具：线程池" class="headerlink" title="7.并发工具：线程池"></a>7.并发工具：线程池</h2><h3 id="7-2-ThreadPoolExecutor"><a href="#7-2-ThreadPoolExecutor" class="headerlink" title="7.2 ThreadPoolExecutor"></a>7.2 ThreadPoolExecutor</h3><p>ThreadPoolExecutor是JDK提供的线程池实现，实现了ExecutorService接口。</p>
 <h4 id="7-2-1-线程池状态"><a href="#7-2-1-线程池状态" class="headerlink" title="7.2.1 线程池状态"></a>7.2.1 线程池状态</h4><p>ThreadPoolExecutor用int的高3位表示线程池状态，低29位表示线程数量。</p>
 <table>
 <thead>
@@ -260,6 +260,21 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Future&lt;Boolean&gt; f = pool.submit(() -&gt; &#123;</span><br><span class="line">    log.debug(<span class="string">&quot;start...&quot;</span>);</span><br><span class="line">    <span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">1</span> / <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;);</span><br><span class="line">log.debug(<span class="string">&quot;result:&#123;&#125;&quot;</span>,f.get());</span><br></pre></td></tr></table></figure>
 
 <p>如果没有异常，就会返回result: true，如果有异常就会被正确捕获。</p>
+<h3 id="7-3-Fork-Join线程池"><a href="#7-3-Fork-Join线程池" class="headerlink" title="7.3 Fork/Join线程池"></a>7.3 Fork/Join线程池</h3><p>Fork/Join是JDK1.7加入的新的线程池实现，体现了分治的思想，适用于能够进行任务拆分的CPU密集型运算。</p>
+<p>所谓任务拆分，是将一个大任务拆分为算法上相同的小任务，直到不能拆分可以直接求解。</p>
+<p>Fork/Join就是在分治的基础上加入了多线程，可以把每个任务的分解和合并交给不同的线程来完成，提升运算效率。</p>
+<p>Fork/Join默认创建与CPU核心数大小相同的线程池。</p>
+<p>使用方法：</p>
+<ol>
+<li>创建一个任务对象，有返回值的话继承父类RecursiveTask，没有返回值可以继承RecursiveAction，重写compute()做具体操作。</li>
+<li>创建ForkJoin线程池对象，调用<code>invoke(ForkJoinTask&lt;T&gt; task)</code>。</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test1</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception&#123;</span><br><span class="line">        <span class="type">ForkJoinPool</span> <span class="variable">pool</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ForkJoinPool</span>(<span class="number">4</span>);</span><br><span class="line">        System.out.println(pool.invoke(<span class="keyword">new</span> <span class="title class_">MyTask</span>(<span class="number">5</span>)));</span><br><span class="line">        <span class="comment">//new MyTask(5)--&gt;5+new MyTask(4), MyTask(4)--&gt;4+MT(3), MT(3)--&gt;3+MT(2),MT(2)--&gt;2+MT(1) </span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//求1~n的整数和</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyTask</span> <span class="keyword">extends</span> <span class="title class_">RecursiveTask</span>&lt;Integer&gt;&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> n;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">MyTask</span><span class="params">(<span class="type">int</span> n)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.n = n;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> Integer <span class="title function_">compute</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (n == <span class="number">1</span>) <span class="keyword">return</span> <span class="number">1</span>; <span class="comment">//终止条件</span></span><br><span class="line"></span><br><span class="line">        <span class="type">MyTask</span> <span class="variable">t1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MyTask</span>(n - <span class="number">1</span>);</span><br><span class="line">        t1.fork(); <span class="comment">//让一个线程去执行此任务</span></span><br><span class="line">        <span class="type">int</span> <span class="variable">result</span> <span class="operator">=</span> n + t1.join(); <span class="comment">//获取任务结果</span></span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+
 
 </div> 
 
@@ -271,6 +286,11 @@
     <nav class="post-nav">
         <div class="prev-item">
            
+                <div class="icon arrow-left"></div>
+                <div class="post-link">
+                    <a href="/2022/06/04/JUC-AQS%E6%BA%90%E7%A0%81/">Prev</a>
+                </div>
+            
         </div>
         <div class="next-item">
             
