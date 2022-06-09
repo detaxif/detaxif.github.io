@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ch">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="yeung">
+
+
+
+
+
+
+
+<title>JUC-读写锁+StampedLock | YE&#39;s BLOG</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+
+
+
+  <meta name="generator" content="Hexo 5.4.1"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">Ultralight Beam.</a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archives</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/about/">About</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/tag/">Tags</a>
+              </li> 
+                   
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/JUC/">
+                            JUC
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                JUC-读写锁+StampedLock
+            
+            
+        </div>
+        <span class="post-date">
+            06 09, 2022
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h1 id="JUC-读写锁-StampedLock"><a href="#JUC-读写锁-StampedLock" class="headerlink" title="JUC-读写锁+StampedLock"></a>JUC-读写锁+StampedLock</h1><p>锁的演化历程：</p>
+<p><img src="img.png" alt="img"></p>
+<h2 id="8-ReentrantReadWriteLock"><a href="#8-ReentrantReadWriteLock" class="headerlink" title="8.ReentrantReadWriteLock"></a>8.ReentrantReadWriteLock</h2><p>读写锁：一个资源能被多个读线程访问，或者被一个写线程访问，但不能同时存在读写线程。即读写互斥，读读共享，写的时候不能读，读的时候不能写。<strong>读操作没有完成前，写操作不能获得锁。</strong></p>
+<p>只有在读多写少的场景下，读写锁才有较高的性能体现。</p>
+<h3 id="8-1-读写锁代码演示"><a href="#8-1-读写锁代码演示" class="headerlink" title="8.1 读写锁代码演示"></a>8.1 读写锁代码演示</h3><p>10个线程进行写操作，10个线程进行读操作：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test1</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">        <span class="type">MyResource</span> <span class="variable">resource</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MyResource</span>();</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">1</span>; i &lt;= <span class="number">10</span>; i++) &#123;</span><br><span class="line">            <span class="type">int</span> <span class="variable">finalI</span> <span class="operator">=</span> i;</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">Thread</span>(()-&gt;&#123;</span><br><span class="line">                resource.write(finalI+<span class="string">&quot;&quot;</span>,finalI+<span class="string">&quot;&quot;</span>);</span><br><span class="line">            &#125;,String.valueOf(i)).start();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">1</span>; i &lt;= <span class="number">10</span>; i++) &#123;</span><br><span class="line">            <span class="type">int</span> <span class="variable">finalI</span> <span class="operator">=</span> i;</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">Thread</span>(()-&gt;&#123;</span><br><span class="line">                resource.read(finalI+<span class="string">&quot;&quot;</span>);</span><br><span class="line">            &#125;,String.valueOf(i)).start();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">@Slf4j(topic = &quot;c.Lock&quot;)</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyResource</span>&#123;</span><br><span class="line">    Map&lt;String,String&gt; map = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">    <span class="type">ReadWriteLock</span> <span class="variable">rwLock</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ReentrantReadWriteLock</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">write</span><span class="params">(String key, String value)</span>&#123;</span><br><span class="line">        rwLock.writeLock().lock();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            log.debug(<span class="string">&quot;&#123;&#125; writing...&quot;</span>,Thread.currentThread().getName());</span><br><span class="line">            map.put(key,value);</span><br><span class="line">            Thread.sleep(<span class="number">500</span>);</span><br><span class="line">            log.debug(<span class="string">&quot;&#123;&#125; finished writing...&quot;</span>,Thread.currentThread().getName());</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            rwLock.writeLock().unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">read</span><span class="params">(String key)</span>&#123;</span><br><span class="line">        rwLock.readLock().lock();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            log.debug(<span class="string">&quot;&#123;&#125; reading...&quot;</span>,Thread.currentThread().getName());</span><br><span class="line">            <span class="type">String</span> <span class="variable">result</span> <span class="operator">=</span> map.get(key);</span><br><span class="line">            Thread.sleep(<span class="number">200</span>);</span><br><span class="line">            log.debug(<span class="string">&quot;&#123;&#125; finished reading... result:&#123;&#125;&quot;</span>,Thread.currentThread().getName(),result);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            rwLock.readLock().unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>根据输出，确定读写锁在写的时候是独占锁的，不能有人中断。但在读的时候，别人也可以一起读。</p>
+<p><img src="img1.png" alt="img1"></p>
+<p><img src="img2.png" alt="img2"></p>
+<h3 id="8-2-锁降级"><a href="#8-2-锁降级" class="headerlink" title="8.2 锁降级"></a>8.2 锁降级</h3><p>ReentrantReadWriteLock锁降级，就是将写入锁降级为读锁。因为一般来说写的权限是要高于读的。具体来说：</p>
+<ol>
+<li>因为有可重入的特性，如果一个线程持有了写锁，在没有释放写锁的情况下，它还可以获得读锁，这就是写锁的降级，降级成为了读锁。</li>
+<li>按照规则，线程遵循先获取写锁，再获取读锁，然后释放写锁的次序。</li>
+<li>一旦释放了写锁，就完全转换为读锁。</li>
+</ol>
+<p><strong>写锁可以降级为读锁，读锁不能升级为写锁。</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">writeLock.lock();</span><br><span class="line">log.debug(<span class="string">&quot;writing...&quot;</span>);</span><br><span class="line">readLock.lock();</span><br><span class="line">log.debug(<span class="string">&quot;reading...&quot;</span>);</span><br><span class="line"></span><br><span class="line">readLock.unlock();</span><br><span class="line">writeLock.unlock();</span><br></pre></td></tr></table></figure>
+
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">17:06:53.459 [main] c.Test - writing...</span><br><span class="line">17:06:53.461 [main] c.Test - reading...</span><br></pre></td></tr></table></figure>
+
+<p>但如果把读锁放在前面：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">readLock.lock();</span><br><span class="line">log.debug(<span class="string">&quot;reading...&quot;</span>);</span><br><span class="line">writeLock.lock();</span><br><span class="line">log.debug(<span class="string">&quot;writing...&quot;</span>);</span><br><span class="line"></span><br><span class="line">readLock.unlock();</span><br><span class="line">writeLock.unlock();</span><br></pre></td></tr></table></figure>
+
+<p>写线程就会被阻塞，读锁没有释放，写锁就进不去。这是一种悲观的读锁。</p>
+<h4 id="8-2-1-为什么要锁降级？"><a href="#8-2-1-为什么要锁降级？" class="headerlink" title="8.2.1 为什么要锁降级？"></a>8.2.1 为什么要锁降级？</h4><p>一个锁降级的使用案例：</p>
+<p>一个CachedData类中定义了一个volatile修饰的boolean变量cacheValid，定义了一个方法processCachedData：</p>
+<p><img src="img3.png" alt="img3"></p>
+<p>首先获取读锁，如果cache为空，则释放读锁，获取写锁。在更改数据之前，再一次检查cacheValid，然后修改数据，然后将cacheValid置为true，<strong>然后在释放写锁前立刻抢夺读锁</strong>，此时因为有读锁在操作，别的写线程就不能获得写锁，等该读锁完成了<code>use(data)</code>中的方法，释放读锁后，别的写线程才能进行操作。</p>
+<p>这就是锁降级的完整过程，目的是保证数据可见性。</p>
+<p>如果当前线程A在修改完cache的数据后，直接释放写锁，而不是先获得读锁，也就是把绿线的<code>rwl.readLock().lock()</code>放到下面的try块中的话，那么在释放写锁和获得读锁之间，可能会有别的线程B获取写锁并修改了数据，那么A无法感知到数据已经被修改，数据就出现了错误。</p>
+<p>锁降级的本质是释放掉独占锁，使其他线程可以获取到读锁，提高并发，而当前线程持有读锁来保证数据的可见性。</p>
+<h2 id="9-StampedLock"><a href="#9-StampedLock" class="headerlink" title="9. StampedLock"></a>9. StampedLock</h2><p>StampedLock是比读写锁更快的锁。是JDK1.8新增的一个读写锁，也是对JDK1.5中读写锁的优化。它是由锁饥饿问题引出来的。</p>
+<h3 id="9-1-锁饥饿问题"><a href="#9-1-锁饥饿问题" class="headerlink" title="9.1 锁饥饿问题"></a>9.1 锁饥饿问题</h3><p>ReentrantReadWriteLock实现了读写分离，但是一旦读操作比较多，想要获取写锁就比较困难了。比如有1000个线程，999个读，1个写，有可能999个读线程长时间抢到锁，那1个写线程就可能会因为一直存在读锁儿无法获得写锁。</p>
+<p>于是有了StampedLock，它是乐观锁，读线程获得读锁后，其他线程尝试获取写锁时不会被阻塞。</p>
+<h3 id="9-2-特点"><a href="#9-2-特点" class="headerlink" title="9.2 特点"></a>9.2 特点</h3><ol>
+<li>所有获取锁的方法，都返回一个Stamp，Stamp为0表示获取失败，其余表示获取成功。</li>
+<li>所有释放锁的方法，都需要一个参数Stamp，这个Stamp必须和成功获取锁时得到的Stamp一致。</li>
+<li>StampedLock是不可重入的。</li>
+<li>StampedLock有三种访问模式：Read悲观读模式（和读写锁的读锁类似） / Write写模式（和读写锁的写锁类似）/ OptimisticReading乐观读模式（无锁机制，类似于数据库中的乐观锁，支持读写并发，乐观地认为读取时没人修改，如果被修改了再升级为悲观读模式）</li>
+</ol>
+<h3 id="9-3-代码演示"><a href="#9-3-代码演示" class="headerlink" title="9.3 代码演示"></a>9.3 代码演示</h3><p>有一个静态变量number = 30，在乐观读的期间，写线程介入修改了变量，乐观读升级为悲观读：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Slf4j(topic = &quot;c.Test&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test1</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="type">int</span> <span class="variable">number</span> <span class="operator">=</span> <span class="number">30</span>;</span><br><span class="line">    <span class="keyword">static</span> <span class="type">StampedLock</span> <span class="variable">stampedLock</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StampedLock</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">tryOptimisticRead</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="type">long</span> <span class="variable">stamp</span> <span class="operator">=</span> stampedLock.tryOptimisticRead();</span><br><span class="line">        <span class="type">int</span> <span class="variable">result</span> <span class="operator">=</span> number;</span><br><span class="line">        <span class="comment">//故意间隔4秒 乐观地认为在读取过程中 没有其他线程修改过number 具体看validate方法的判断</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">4</span>; i++) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">            log.debug(<span class="string">&quot;loading data...&quot;</span>+i+<span class="string">&quot;seconds later\t&quot;</span>+stampedLock.validate(stamp));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//如果读取期间被修改过 进入if块</span></span><br><span class="line">        <span class="keyword">if</span> (!stampedLock.validate(stamp))&#123;</span><br><span class="line">            log.debug(<span class="string">&quot;number has been edited...&quot;</span>);</span><br><span class="line">            stamp = stampedLock.readLock();</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                log.debug(<span class="string">&quot;upgrade optimistic read to pessimistic read&quot;</span>);</span><br><span class="line">                result = number;</span><br><span class="line">                log.debug(<span class="string">&quot;pessimistic read result:&#123;&#125;&quot;</span>,result);</span><br><span class="line">            &#125;<span class="keyword">finally</span> &#123;</span><br><span class="line">                stampedLock.unlockRead(stamp);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//如果乐观成功 读取期间没有人修改 直接输出最终值</span></span><br><span class="line">        log.debug(<span class="string">&quot;final value:&#123;&#125;&quot;</span>,result);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">write</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="type">long</span> <span class="variable">stamp</span> <span class="operator">=</span> stampedLock.writeLock();</span><br><span class="line">        log.debug(<span class="string">&quot;write thread writing...&quot;</span>);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            number = number + <span class="number">11</span>;</span><br><span class="line">        &#125;<span class="keyword">finally</span> &#123;</span><br><span class="line">            stampedLock.unlockWrite(stamp);</span><br><span class="line">        &#125;</span><br><span class="line">        log.debug(<span class="string">&quot;write thread finished writing...&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">        <span class="type">Test1</span> <span class="variable">resource</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Test1</span>();</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Thread</span>(()-&gt;&#123;</span><br><span class="line">            resource.tryOptimisticRead();</span><br><span class="line">        &#125;,<span class="string">&quot;readThread&quot;</span>).start();</span><br><span class="line"></span><br><span class="line">        <span class="comment">//暂停2秒 读的过程 写可以介入</span></span><br><span class="line">        Thread.sleep(<span class="number">2000</span>);</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Thread</span>(()-&gt;&#123;</span><br><span class="line">            log.debug(<span class="string">&quot;write thread coming in...&quot;</span>);</span><br><span class="line">            resource.write();</span><br><span class="line">        &#125;,<span class="string">&quot;writeThread&quot;</span>).start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出：</p>
+<p><img src="img4.png" alt="img4"></p>
+<p>关键就是<code>stampedLock.validate(long stamp)</code>这个方法，判断在读期间这个值有没有被修改过。</p>
+<h3 id="9-4-StampedLock缺点与注意点"><a href="#9-4-StampedLock缺点与注意点" class="headerlink" title="9.4 StampedLock缺点与注意点"></a>9.4 StampedLock缺点与注意点</h3><ol>
+<li>StampedLock不支持重入。</li>
+<li>StampedLock的悲观读锁和写锁都不支持条件变量Condition。</li>
+<li>使用StampedLock一定不要调用中断操作，即不要调用interrupt()方法。</li>
+</ol>
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2022/06/07/JUC-%E5%9F%BA%E4%BA%8EAQS%E7%9A%84%E5%B7%A5%E5%85%B7%E7%B1%BB/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+                Ye Yang | 
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://hexo.io/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+  </body>
+</html>
