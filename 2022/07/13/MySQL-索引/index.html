@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ch">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="yeung">
+
+
+
+
+
+
+
+<title>MySQL-索引 | YE&#39;s BLOG</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+
+
+
+  <meta name="generator" content="Hexo 5.4.1"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">Ultralight Beam.</a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archives</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/about/">About</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/tag/">Tags</a>
+              </li> 
+                   
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/MySQL/">
+                            MySQL
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                MySQL-索引
+            
+            
+        </div>
+        <span class="post-date">
+            07 13, 2022
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h1 id="MySQL-索引"><a href="#MySQL-索引" class="headerlink" title="MySQL-索引"></a>MySQL-索引</h1><h2 id="1-什么是索引"><a href="#1-什么是索引" class="headerlink" title="1. 什么是索引"></a>1. 什么是索引</h2><p>索引是对数据库表中一列或多列值进行排序的一种结构。MySQL索引的建立对MySQL的高效运行是很重要的，可以大大提高检索速度。</p>
+<h2 id="2-索引的优缺点"><a href="#2-索引的优缺点" class="headerlink" title="2. 索引的优缺点"></a>2. 索引的优缺点</h2><p>如果索引可以大大提高检索效率，为什么不对表中每一个列创建一个索引呢？</p>
+<p>优点：</p>
+<ol>
+<li>索引大大减小了服务器需要扫描的数据量，从而大大加快数据的检索速度。</li>
+<li>索引可以帮助服务器避免排序和创建临时表。</li>
+<li>索引可以将随机IO变成顺序IO。</li>
+<li>索引对InnoDB的行级锁来说，可以提高表访问的并发性。</li>
+<li>通过创建唯一性索引，可以保证数据库表中每一行数据的唯一性。</li>
+<li>可以加速表和表之间的连接。</li>
+</ol>
+<p>但也有缺点：</p>
+<ol>
+<li>创建和维护索引需要耗费时间，且时间随着数据量的增加而增加。</li>
+<li>每一个索引需要占用一定物理空间，如果需要建立聚簇索引，则占用空间会更大。</li>
+<li>对表中数据进行增删改查时，索引也要动态地维护，降低了整数的维护速度。</li>
+<li>对于非常小的表，大部分情况下简单的全表扫描更高效。</li>
+</ol>
+<h2 id="3-创建索引的准则"><a href="#3-创建索引的准则" class="headerlink" title="3. 创建索引的准则"></a>3. 创建索引的准则</h2><p>应该创建索引的列：</p>
+<ol>
+<li>经常需要搜索的列，可以加快搜索的速度。</li>
+<li>作为主键的列，强制该列的唯一性和组织表中数据的排列结构。</li>
+<li>经常用在 JOIN 连接的列，加快连接的速度。</li>
+<li>经常需要根据范围进行搜索的列（&lt;, &lt;=, =, &gt;, &gt;=, BETWEEN, IN），因为索引已经排序，其指定的范围是连续的。</li>
+<li>经常需要排序（order by）的列，因为索引已经排序，可以加快排序查询时间。</li>
+<li>经常使用在 WHERE 子句中的列，加快条件的判断速度。</li>
+</ol>
+<p>不该创建索引的列：</p>
+<ol>
+<li>在查询中很少使用或参考的列。</li>
+<li>只有很少数据值或重复值多的列，如性别列。</li>
+<li>数据类型为text / image / bit的列，这些列的数据量要么相当大，要么取值很少。</li>
+<li>当该列修改性能要求远远高于检索性能时，不该创建索引。（修改性能和检索性能是相互矛盾的）</li>
+</ol>
+<h2 id="4-索引结构"><a href="#4-索引结构" class="headerlink" title="4. 索引结构"></a>4. 索引结构</h2><p>MySQL中常用的索引结构（索引底层的数据结构）有：B-TREE / B+Tree / HASH 等。</p>
+<ol>
+<li>B-TREE，B树，多路搜索树，树高一层意味着多一次的磁盘IO。</li>
+</ol>
+<p>B树的特征：</p>
+<ul>
+<li>关键字集合分布在整棵树中。</li>
+<li>任何一个关键字出现且只出现在一个结点中。</li>
+<li>搜索有可能在非叶子结点结束。</li>
+<li>搜索性能等价于在关键字全集内做一次二分查找。</li>
+<li>自动层次控制。</li>
+</ul>
+<ol start="2">
+<li>B+TREE，B+树，是B树的变体，也是一种多路搜索树。</li>
+</ol>
+<p>B+树的特征：</p>
+<ul>
+<li>所有关键字都出现在叶子结点的链表中（稠密索引），且链表中的关键字是有序的。</li>
+<li>不可能在非叶子结点命中。</li>
+<li>非叶子结点相当于叶子结点的索引（稀疏索引），叶子结点相当于存储数据（关键字）的数据层。</li>
+<li>每一个叶子结点都包含指向下一个叶子结点的指针，方便叶子结点的范围遍历。</li>
+<li>更适合文件索引系统。</li>
+</ul>
+<ol start="3">
+<li>HASH，哈希索引，就是采用一定的哈希算法，把键值换算成新的哈希值，检索时不需要类似B+树那样从根结点到叶子结点逐级查找，只需一次哈希算法即可立即定位到相应的位置，速度非常快。由于哈希索引比较的是进行哈希运算后的哈希值，所以它只能用于等值的过滤，不能用于基于范围的过滤。</li>
+</ol>
+<h2 id="5-索引分类"><a href="#5-索引分类" class="headerlink" title="5. 索引分类"></a>5. 索引分类</h2><p>MySQL的索引有两种分类方式：逻辑分类和物理分类。</p>
+<h3 id="5-1-逻辑分类"><a href="#5-1-逻辑分类" class="headerlink" title="5.1 逻辑分类"></a>5.1 逻辑分类</h3><p>逻辑分类又可以分为按功能划分、按组成索引的列数划分等。</p>
+<p>按功能划分：</p>
+<ol>
+<li>主键索引：一张表只能有一个主键索引，不允许重复，不允许为NULL。</li>
+<li>唯一索引：数据列不允许重复，允许为NULL，一张表可以有多个唯一索引。如果是组合索引，则列值的组合必须是唯一。</li>
+<li>普通索引：一张表可以创建多个普通索引，一个普通索引可以包含多个字段，允许重复，允许NULL值。</li>
+<li>全文索引：它查找的是文本中的关键词，主要用于全文搜索。</li>
+</ol>
+<p>按列数划分：</p>
+<ol>
+<li>单列索引：一个索引只包含一个列，一个表可以有多个单列索引。</li>
+<li>组合索引：一个组合索引包含两个或以上的列。查询时遵循最左匹配原则，即使用where时，条件要按照建立索引时字段的排列方式放置，索引才会生效。</li>
+</ol>
+<h3 id="5-2-物理分类"><a href="#5-2-物理分类" class="headerlink" title="5.2 物理分类"></a>5.2 物理分类</h3><p>分为聚簇索引和非聚簇索引。</p>
+<ol>
+<li>聚簇索引：不是单独的一种索引类型，而是一种数据存储方式，依靠B+树来实现，根据表的主键构造一颗B+树，且叶子结点存放的都是表的行记录数据时，方可称该主键索引为聚簇索引。也可以理解为将数据存储与索引放到了一块，找到索引也就找到了数据。</li>
+<li>非聚簇索引：数据和索引是分开的，B+树叶子结点存放的不是数据表的行记录。</li>
+</ol>
+<p>虽然InnoDB和MyISAM都默认使用B+树存储索引，但<strong>只有InnoDB的主键索引才是聚簇索引。</strong></p>
+<p><strong>每张表最多只能拥有一个聚簇索引。</strong></p>
+<p>聚簇索引优点：</p>
+<ol>
+<li>数据访问更快，因为聚簇索引将索引和数据保存在同一个B+树中，因此从聚簇索引中获取数据比非聚簇索引更快。</li>
+<li>聚簇索引对于主键的排序查找和范围查找速度非常快。</li>
+</ol>
+<p>缺点：</p>
+<ol>
+<li>插入速度严重依赖于插入顺序，按照主键的顺序插入是最快的方式，否则会出现页分裂，严重影响性能。因此，对于InnoDB表，我们会定义一个自增的ID列为主键。</li>
+<li>更新主键的代价很高，因为会导致被更新的行移动，因此对于InnoDB表，我们一般定义主键为不可更新。</li>
+<li>二级索引访问需要两次索引查找，第一次找到主键值，第二次根据主键值找到行数据。</li>
+</ol>
+<h2 id="6-InnoDB和MyISAM索引实现"><a href="#6-InnoDB和MyISAM索引实现" class="headerlink" title="6. InnoDB和MyISAM索引实现"></a>6. InnoDB和MyISAM索引实现</h2><h3 id="6-1-InnoDB索引实现"><a href="#6-1-InnoDB索引实现" class="headerlink" title="6.1 InnoDB索引实现"></a>6.1 InnoDB索引实现</h3><h4 id="6-1-1-聚簇索引-主键索引"><a href="#6-1-1-聚簇索引-主键索引" class="headerlink" title="6.1.1 聚簇索引 / 主键索引"></a>6.1.1 聚簇索引 / 主键索引</h4><p>B+树叶子结点包含数据表中行记录就是聚簇索引。（索引和数据存放在一起）</p>
+<p><img src="img1.png" alt="img1"></p>
+<p>可以看到叶子结点包含了完整的数据记录，这就是聚簇索引。</p>
+<p>注意：</p>
+<ul>
+<li>B+树单个叶子结点内的行数据按照主键顺序排列，物理空间是连续的。（聚簇索引的数据的物理存放顺序与索引顺序是一致的）</li>
+<li>叶子结点之间通过指针连接，相邻叶子结点的数据在逻辑上也是连续的（根据主键值排序），实际存储时的叶子结点可能相距甚远。</li>
+</ul>
+<h4 id="6-1-2-非聚簇索引-辅助索引"><a href="#6-1-2-非聚簇索引-辅助索引" class="headerlink" title="6.1.2 非聚簇索引 / 辅助索引"></a>6.1.2 非聚簇索引 / 辅助索引</h4><p>在聚簇索引之外创建的索引，即不是根据主键创建的，称为辅助索引。<strong>辅助索引访问数据总是需要二次查找。</strong>辅助索引叶子结点存储的不是行数据记录，而是主键值。首先通过辅助索引找到主键值，再到主键索引树中通过主键值找到数据行。（InnoDB一定会有主键索引）</p>
+<p>![img2](/Users/ye/blog/source/_posts/MySQL-索引/截屏2022-07-22 20.18.29.png)</p>
+<h4 id="6-1-3-InnoDB索引优化"><a href="#6-1-3-InnoDB索引优化" class="headerlink" title="6.1.3 InnoDB索引优化"></a>6.1.3 InnoDB索引优化</h4><ol>
+<li><p>InnoDB主键不宜定义太长（太大）：因为普通索引（辅助索引）的叶子结点存储的是主键值，普通索引查询时先查询主键，再从主键索引上二次遍历索引树。比如现在要存储居民的身份信息，如果以身份证为主键，身份证id_code是一个比较长的字符串，每个普通索引都存储这个值，在数据量大，内存珍贵的情况下，MySQL有限的缓冲区，存储的索引与数据会减少，磁盘IO的概率会增加。应该定义一个无业务含义的id自增列作为主键。</p>
+</li>
+<li><p>InnoDB中尽量不使用非单调字段作为主键：因为InnoDB数据文件本身是一颗B+树，非单调的主键会造成在插入新纪录时，数据文件为了维持B+树的特性而频繁分裂调整，十分低效。应该使用自增字段作为主键。</p>
+</li>
+</ol>
+<h3 id="6-2-MyISAM索引实现"><a href="#6-2-MyISAM索引实现" class="headerlink" title="6.2 MyISAM索引实现"></a>6.2 MyISAM索引实现</h3><p>MyISAM也使用B+树作为索引结构，但实现方式和InnoDB完全不同。<strong>MyISAM使用的都是非聚簇索引。</strong></p>
+<h4 id="6-2-1-主键索引"><a href="#6-2-1-主键索引" class="headerlink" title="6.2.1 主键索引"></a>6.2.1 主键索引</h4><p><img src="img3.png" alt="img3"></p>
+<p>叶子结点存放的是数据记录的地址，即索引和行数据记录没有保存在一起，所以MyISAM的主键索引是非聚簇索引。</p>
+<h4 id="6-2-2-辅助索引"><a href="#6-2-2-辅助索引" class="headerlink" title="6.2.2 辅助索引"></a>6.2.2 辅助索引</h4><p>MyISAM的主键索引和辅助索引在结构上没有区别，<strong>只不过主键索引要求key唯一，而辅助索引的key可以重复。</strong>MyISAM的辅助索引也是非聚簇索引。</p>
+<h3 id="6-3-聚簇索引和非聚簇索引的区别"><a href="#6-3-聚簇索引和非聚簇索引的区别" class="headerlink" title="6.3 聚簇索引和非聚簇索引的区别"></a>6.3 聚簇索引和非聚簇索引的区别</h3><ul>
+<li>聚簇索引的叶子结点存放的是数据行，支持覆盖索引。非聚簇索引的叶子结点存放的是主键值或指向数据行的指针。</li>
+<li>由于叶子结点（数据页）只能按一颗B+树排序，故一张表只能有一个聚簇索引。非聚簇索引的存在不影响聚簇索引中数据的组织，所以一张表可以有多个非聚簇索引。</li>
+</ul>
+<h2 id="7-操作索引"><a href="#7-操作索引" class="headerlink" title="7. 操作索引"></a>7. 操作索引</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"># 创建索引</span><br><span class="line"># 索引名称 index_name 是可以省略的，省略后，索引名称和索引列名相同</span><br><span class="line"></span><br><span class="line"># 创建普通索引</span><br><span class="line">create index index_name on table_name(col_name);</span><br><span class="line"></span><br><span class="line"># 创建唯一索引</span><br><span class="line">create unique index index_name on table_name(col_name);</span><br><span class="line"></span><br><span class="line"># 创建普通组合索引</span><br><span class="line">create index index_name on table_name(col_name_1, col_name_2);</span><br><span class="line"></span><br><span class="line"># 创建唯一组合索引</span><br><span class="line">create unique index index_name on table_name(col_name_1, col_name_2);</span><br><span class="line"></span><br><span class="line"># 修改表结构创建索引</span><br><span class="line">alter table table_name add index index_name(col_name);</span><br><span class="line"></span><br><span class="line"># 删除索引</span><br><span class="line"># 直接删除索引</span><br><span class="line">drop index index_name on table_name;</span><br><span class="line"></span><br><span class="line"># 修改表结构删除索引</span><br><span class="line">alter table table_name drop index index_name;</span><br></pre></td></tr></table></figure>
+
+<h2 id="8-最左前缀原则"><a href="#8-最左前缀原则" class="headerlink" title="8. 最左前缀原则"></a>8. 最左前缀原则</h2><p>在MySQL建立联合索引时，会遵守最左前缀原则。即最左优先，以最左边的为起点，任何连续的索引都能匹配上，同时遇到范围查询（&gt;, &lt;, between, like）就会停止匹配。</p>
+<p>比如有联合索引 (a, b, c)，where过滤条件中那些排列组合可以用到索引？（如 <code>where a = xxx b = xxx and c = xxx</code>）</p>
+<p>以下排列组合会走索引：a / ab / ac / ba / ca / abc / acb / bac / bca / cab / cba。即必须要有一个a，排列组合中的顺序会被优化器优化，所以不用关心顺序。</p>
+<p>以下排列组合不会走索引：b / c / bc / cb。因为没有a。</p>
+<p><code>a = xxx and b &lt; 10 and b &gt; 5 and c = xxx</code> 这种情况，c字段用不到索引，因为b是一个范围查询，遇到范围查询就停止匹配了。</p>
+<h3 id="8-1-最左前缀原则原理"><a href="#8-1-最左前缀原则原理" class="headerlink" title="8.1 最左前缀原则原理"></a>8.1 最左前缀原则原理</h3><p>索引的底层是一颗B+树，联合索引当然也是一颗B+树，只不过联合索引的键值数量不是一个而是多个。构建一颗B+树只能根据一个值来构建，因此数据库依据联合索引最左的字段来构建B+树。</p>
+<p>假如创建一个 (a, b) 的联合索引，那么它的索引树是这样的：</p>
+<p><img src="img4.png" alt="img4"></p>
+<p>可见a的值是有顺序的：1, 1, 2, 2, 3, 3, 3, 3。b的值是没有顺序的：1, 2, 2, 5, 1, 2, 3, 5。所以 b = 2 这种查询条件无法利用索引，因为联合索引首先是按a排序的，b是无序的。</p>
+<p>同时我们可以发现，在a值相等的情况下，b值又是按顺序排列的，这种顺序是相对的。所以最左前缀原则遇上范围查询就会停止，剩下的字段都无法使用索引。例如<code>a = 1 and b = 2</code>，a和b字段都可以使用索引，因为在a值确定的情况下b值是相对有序的；而<code>a &gt; 1 and b = 2</code>，a字段可以匹配上索引，但b值不可以，因为a值是一个范围，在这个范围中b是无序的。</p>
+<h2 id="9-覆盖索引"><a href="#9-覆盖索引" class="headerlink" title="9. 覆盖索引"></a>9. 覆盖索引</h2><p>索引是一个高效找到行数据的方法，当我们select想要查询的数据通过检索索引就能取得，不必再到数据表中读取，<strong>即建立索引的字段正好是select子句和where子句涉及的字段（包含或覆盖）</strong>，也即，索引包含了查询正在查找的所有数据，这就叫覆盖索引。</p>
+<h2 id="10-回表"><a href="#10-回表" class="headerlink" title="10. 回表"></a>10. 回表</h2><p>以InnoDB的辅助索引为例，查完索引后还要去主键索引树二次查找。</p>
+<p>通俗地讲就是，如果select所需获得的列中有大量的非索引列，索引就需要到表中二次查找获得相应的列的信息，这就叫回表。</p>
+<p>我们应该避免回表，方法就是使用覆盖索引，即索引中包含了查询中的所有字段。如果索引的列在select所需获得的列中，或者根据一次索引查询就能获得记录，这种情况就不需要进行回表查询了。</p>
+<h2 id="11-索引下推"><a href="#11-索引下推" class="headerlink" title="11. 索引下推"></a>11. 索引下推</h2><p>索引下推 / Index Condition Pushdown / ICP，是MySQL 5.6后的新特性。</p>
+<p>举例说明：现有表person，其中有3个字段，id name age ，其中id为主键，创建联合索引 (name, age)。</p>
+<p>表中有两条数据：{2, ab, 2} 以及 {15, ab, 15}。现在我们要检索出名字为ab且年龄为2的用户。sql语句：<code>select * from person where name = &#39;ab&#39; and age = 2</code>。</p>
+<p>不使用索引下推的话，存储引擎根据联合索引找到 name = ‘ab’ 的主键id (2, 15)，逐一进行回表扫描，去聚簇索引找到完整的行记录，再对数据根据 age = 2 进行筛选。则进行了两次回表，把联合索引的另一个字段age浪费了。</p>
+<p>使用索引下推的话，存储引擎根据联合索引，找到 name = ‘ab’，由于联合索引包含age列，所以存储引擎直接在联合索引里根据 age = 2 筛选，判断后再进行回表查询。即只进行了一次回表。</p>
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2022/06/09/JUC-%E8%AF%BB%E5%86%99%E9%94%81-StampedLock/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+                Ye Yang | 
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://hexo.io/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+  </body>
+</html>
