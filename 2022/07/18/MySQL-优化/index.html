@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ch">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="yeung">
+
+
+
+
+
+
+
+<title>MySQL-优化 | YE&#39;s BLOG</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+
+
+
+  <meta name="generator" content="Hexo 5.4.1"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">Ultralight Beam.</a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archives</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/about/">About</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/tag/">Tags</a>
+              </li> 
+                   
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/MySQL/">
+                            MySQL
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                MySQL-优化
+            
+            
+        </div>
+        <span class="post-date">
+            07 18, 2022
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h1 id="MySQL-优化"><a href="#MySQL-优化" class="headerlink" title="MySQL-优化"></a>MySQL-优化</h1><h2 id="1-连接查询优化"><a href="#1-连接查询优化" class="headerlink" title="1. 连接查询优化"></a>1. 连接查询优化</h2><p>要想明白多表连接过程中索引是否起作用，哪个表的索引起作用，首先要了解在 join 连接时哪个表是驱动表（主表），哪个表是被驱动表（从表）：</p>
+<ol>
+<li>使用 left join 左连接且查询优化器没有重写查询语句时，左表是驱动表，右表是被驱动表。</li>
+<li>使用 right join 右连接且查询优化器没有重写查询语句时，右表是驱动表，左表是被驱动表。</li>
+<li>使用 join 且两个表的连接条件都存在索引时，MySQL 会选择数据量小的表作为驱动表，数据量大的表作为被驱动表，<strong>即小表驱动大表</strong>，这里的数据量指的是 where 条件过滤后的结果集的表行数 * 每行大小。</li>
+<li>使用 join 且连接条件只有一边存在索引时，有索引的字段所在的表会被查询优化器选为被驱动表。</li>
+</ol>
+<p>而且，多表连接时永远是被驱动表的索引起作用。</p>
+<p><strong>所以对于连接查询：</strong></p>
+<ol>
+<li><strong>驱动表是要进行全表扫描的，所以数据越少越好。</strong></li>
+<li><strong>优先给被驱动表的作为连接条件的字段添加索引。</strong></li>
+</ol>
+<h2 id="2-子查询优化"><a href="#2-子查询优化" class="headerlink" title="2. 子查询优化"></a>2. 子查询优化</h2><p>子查询的执行效率不高，因为：</p>
+<ol>
+<li>执行子查询时，MySQL 需要为内层查询语句的查询结果建立一个临时表，然后外层查询语句从临时表中查询记录，查询完毕后删除临时表。这样会消耗过多 CPU 和 IO 资源，产生大量慢查询。</li>
+<li>存储子查询的结果集的临时表不会存在索引，因此查询性能会受到影响。</li>
+<li>子查询的返回结果集越大，对其查询性能的影响就越大。</li>
+</ol>
+<p><strong>因此，对于子查询的优化就是不用子查询，而是使用 join 连接查询来代替：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"># 有表student和表class</span><br><span class="line"># 其中表class有索引idx_monitor建立在monitor字段上</span><br><span class="line"></span><br><span class="line"># 查询班长的信息</span><br><span class="line"># 子查询</span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> student s</span><br><span class="line"><span class="keyword">where</span> s.stu_no <span class="keyword">in</span> (</span><br><span class="line">	<span class="keyword">select</span> monitor</span><br><span class="line">  <span class="keyword">from</span> class c</span><br><span class="line">  <span class="keyword">where</span> monitor <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">null</span></span><br><span class="line">	);</span><br><span class="line">	</span><br><span class="line"># 用连接查询代替</span><br><span class="line"><span class="keyword">select</span> s.<span class="operator">*</span> </span><br><span class="line"><span class="keyword">from</span> student s <span class="keyword">join</span> class c</span><br><span class="line"><span class="keyword">on</span> s.stu_no <span class="operator">=</span> c.monitor</span><br><span class="line"><span class="keyword">where</span> c.monitor <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">null</span>;</span><br></pre></td></tr></table></figure>
+
+<p>而在连接查询中，尽量不要使用 <code>NOT IN</code> 或 <code>NOT EXISTS</code>，可以用 <code>left join aaa on bbb where xxx is null</code> 代替：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"># 查询不为班长的学生信息</span><br><span class="line"># 子查询 <span class="keyword">not</span> <span class="keyword">in</span></span><br><span class="line"><span class="keyword">select</span> s.<span class="operator">*</span> </span><br><span class="line"><span class="keyword">from</span> student s </span><br><span class="line"><span class="keyword">where</span> s.stu_no <span class="keyword">not</span> <span class="keyword">in</span> (</span><br><span class="line">	<span class="keyword">select</span> monitor </span><br><span class="line">  <span class="keyword">from</span> class c</span><br><span class="line">  <span class="keyword">where</span> monitor <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">null</span></span><br><span class="line">	);</span><br><span class="line">	</span><br><span class="line"># 连接查询 代替</span><br><span class="line"><span class="keyword">select</span> s.<span class="operator">*</span></span><br><span class="line"><span class="keyword">from</span> student s </span><br><span class="line"><span class="keyword">left</span> <span class="keyword">join</span> class c</span><br><span class="line"><span class="keyword">on</span> s.stu_no <span class="operator">=</span> c.monitor </span><br><span class="line"><span class="keyword">where</span> c.monitor <span class="keyword">is</span> <span class="keyword">null</span>;</span><br><span class="line"># 就是左外连接获得左表所有数据和两表交集，通过<span class="keyword">where</span> xxx <span class="keyword">is</span> <span class="keyword">null</span>把交集去掉了</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-排序优化"><a href="#3-排序优化" class="headerlink" title="3. 排序优化"></a>3. 排序优化</h2><p>为什么我们要在 order by 的字段上加索引？</p>
+<p>因为 MySQL 支持两种排序，分别是 FileSort 和 Index 排序。</p>
+<ul>
+<li>FileSort 排序则一般在内存中进行排序，CPU 占用较高，如果待排序的结果较大，会产生临时文件 IO 到磁盘进行排序，效率较低。</li>
+<li>Index 排序中，索引可以保证数据的有序性，不需要再进行排序，效率更高。</li>
+</ul>
+<h3 id="3-1-排序时索引失效的问题"><a href="#3-1-排序时索引失效的问题" class="headerlink" title="3.1 排序时索引失效的问题"></a>3.1 排序时索引失效的问题</h3><p>在排序时，有几种情况可能导致索引失效：</p>
+<ol>
+<li>order by 时不使用 limit</li>
+</ol>
+<p>比如现有 student 表，里面有50万条数据，有一个索引 idx_age_classid_name，需求是按照 age 和 classid 进行排序得到所有数据：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> student</span><br><span class="line"><span class="keyword">order</span> <span class="keyword">by</span> age, classid;</span><br></pre></td></tr></table></figure>
+
+<p>会发现索引失效了。因为查询优化器发现，要查询 * 所有字段，如果走索引会导致50万次的回表，那还不如直接全表扫描来的快。</p>
+<p>增加 limit 过滤条件：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> student</span><br><span class="line"><span class="keyword">order</span> <span class="keyword">by</span> age, classid</span><br><span class="line">limit <span class="number">10</span>;</span><br></pre></td></tr></table></figure>
+
+<p>就使用上索引了。</p>
+<p>当然，如果把 * 改成 <code>age, classid</code>，也会使用这个索引，因为这是覆盖索引。</p>
+<ol start="2">
+<li>order by 时不符合最左匹配原则</li>
+<li>order by 时规则不一致</li>
+</ol>
+<p>比如 student 表里有一个索引 idx_age_classid_name：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> student <span class="keyword">order</span> <span class="keyword">by</span> age <span class="keyword">desc</span>, classid <span class="keyword">asc</span> limit <span class="number">10</span>;</span><br><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> student <span class="keyword">order</span> <span class="keyword">by</span> age <span class="keyword">asc</span>, classid <span class="keyword">desc</span> limit <span class="number">10</span>;</span><br><span class="line"># 因为排序的规则不一致，一个升序一个降序，导致索引失效</span><br><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> student <span class="keyword">order</span> <span class="keyword">by</span> age <span class="keyword">desc</span>, classid <span class="keyword">desc</span> limit <span class="number">10</span>;</span><br><span class="line"># 规则一致，都是降序排序，可以使用索引</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-FileSort算法"><a href="#3-2-FileSort算法" class="headerlink" title="3.2 FileSort算法"></a>3.2 FileSort算法</h3><p>如果 order by 的字段不在索引上，就会使用 FileSort 排序，FileSort 有两种算法：双路排序和单路排序。</p>
+<p><strong>双路排序（慢）：</strong>MySQL 4.1 之前使用双路排序，就是两次扫描磁盘，最终得到数据。即首先找到 order by 的字段加载到内存中，针对这个字段进行排序，然后扫描已经排序好的列表，根据那个字段重新读取对应的完整的数据输出。</p>
+<p><strong>单路排序（快）：</strong>一上来直接从磁盘读取查询需要的所有列，按照 order by 的字段在 buffer 中对他们进行排序，然后扫描排序后的列表进行输出。避免了第二次读取数据，把随机 IO 变成了顺序 IO，但对内存的要求更高，用空间换时间。</p>
+<p>因为单路排序是把所有字段都取出，所以有可能取出的数据的总大小超出了 sort_buffer 的容量，导致每次只能取 sort_buffer 容量大小的数据进行排序，取完一次再取 sort_buffer 容量大小的数据，发生多次 IO，反而得不偿失。</p>
+<p>因此，如果要使用 FileSort 排序，需要对其进行调优。</p>
+<p>FileSort 的优化策略：</p>
+<ol>
+<li>尝试提高 sort_buffer_size</li>
+</ol>
+<p>不管用哪种算法，提高这个参数都会提高效率，要根据系统的能力去提高。MySQL 5.7 InnoDB 引擎中的默认值为 1MB。</p>
+<p><code>show variables like &#39;%sort_buffer_size%&#39;</code></p>
+<ol start="2">
+<li>max_length_for_sort_data</li>
+</ol>
+<p>提高这个参数，会增加用改进算法的概率。这个参数就是和查询的字段的长度做对比，如果字段的长度比较短，就会用单路排序。如果字段长度比较长，大于这个参数，就会用双路算法。</p>
+<p>但是如果设的太高，数据总容量超出 sort_buffer_size 的概率就会增大，表现为高的磁盘 IO 活动和低的处理器使用率。</p>
+<p><code>show variables like &#39;%max_length_for_sort_data%&#39;</code> 默认为1024字节，可以在 1024～8192 字节之间调整。</p>
+<ol start="3">
+<li>order by 时不要 select *，最好只查找需要的字段</li>
+</ol>
+<p>因为当 Query 的字段大小总和小于 max_length_for_sort_data，且排序字段不是 TEXT / BLOB 类型时，会使用改进后的单路排序算法，否则使用老算法多路排序。</p>
+<h3 id="3-3-排序优化总结"><a href="#3-3-排序优化总结" class="headerlink" title="3.3 排序优化总结"></a>3.3 排序优化总结</h3><p>因此，对于排序的优化：</p>
+<ol>
+<li>在 where 和 order by 子句中使用索引，目的是在 where 子句中避免全表扫描，在 order by 子句中避免使用 FileSort 排序。</li>
+<li>尽量使用 Index 来完成 order by 排序。如果 where 和 order by 后面是相同的列就使用单列索引，否则就使用联合索引。</li>
+<li>无法使用 Index 排序时，需要对 FileSort 方法进行调优。</li>
+</ol>
+<h2 id="4-Group-By-优化"><a href="#4-Group-By-优化" class="headerlink" title="4. Group By 优化"></a>4. Group By 优化</h2><ol>
+<li>group by 使用索引的原则几乎和 order by 一致，group by 即使没有使用过滤条件也可以直接使用索引。</li>
+<li>group by 先排序再分组，遵循最左匹配原则。</li>
+<li>当无法使用索引列，增大 sort_buffer_size 和 max_length_for_sort_data 参数的值。</li>
+<li>where 的效率高于 having，非聚合函数能写在 where 里就不要写在 having 里。</li>
+<li>减少使用 order by / group by / distinct，或者将这些放到程序段做，因为这些语句较为耗费 CPU 资源。</li>
+<li>包含 order by / group by / distinct 的查询语句，where 条件过滤后的结果集最好保持在 1000 行以内，否则 SQL 会很慢。</li>
+</ol>
+<h2 id="5-分页查询优化"><a href="#5-分页查询优化" class="headerlink" title="5. 分页查询优化"></a>5. 分页查询优化</h2><p>使用分页查询的时候，偏移量和查询记录量越大，所花费的时间也会越多：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> student limit <span class="number">2000000</span>, <span class="number">10</span>;</span><br></pre></td></tr></table></figure>
+
+<p>要想优化有两种思路。</p>
+<ol>
+<li>使用 id 限定优化：</li>
+</ol>
+<p>假设表的 id 是连续递增的，则我们可以根据偏移量和查询记录数算出要查询的 id 的范围。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> student <span class="keyword">where</span> id <span class="operator">&gt;</span> <span class="number">2000000</span> limit <span class="number">10</span>;</span><br><span class="line"># 或</span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> student <span class="keyword">where</span> id <span class="keyword">between</span> <span class="number">2000000</span> <span class="keyword">and</span> <span class="number">2000010</span> limit <span class="number">10</span>; </span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>使用子查询优化：</li>
+</ol>
+<p>假设表的 id 是连续递增的，可以先定位偏移位置的 id，然后往后查询。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> </span><br><span class="line"><span class="keyword">from</span> student</span><br><span class="line"><span class="keyword">where</span> id <span class="operator">&gt;=</span> (</span><br><span class="line">	<span class="keyword">select</span> id </span><br><span class="line">  <span class="keyword">from</span> student</span><br><span class="line">  limit <span class="number">2000000</span>,<span class="number">1</span></span><br><span class="line">	)</span><br><span class="line">limit <span class="number">10</span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="6-其它查询优化"><a href="#6-其它查询优化" class="headerlink" title="6. 其它查询优化"></a>6. 其它查询优化</h2><h3 id="6-1-EXISTS-和-IN-的选择"><a href="#6-1-EXISTS-和-IN-的选择" class="headerlink" title="6.1 EXISTS 和 IN 的选择"></a>6.1 EXISTS 和 IN 的选择</h3><p>什么时候用 EXISTS，什么时候用 IN？</p>
+<p>主要根据数据量的大小做选择，比如：</p>
+<p>当 A 小于 B ，用 EXISTS。因为 EXISTS 的实现相当于外表循环，从外层送一条数据进去，内层查完之后再从外层送进来。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> </span><br><span class="line"><span class="keyword">from</span> A </span><br><span class="line"><span class="keyword">where</span> <span class="keyword">exists</span> (</span><br><span class="line">	<span class="keyword">select</span> cc</span><br><span class="line">  <span class="keyword">from</span> B</span><br><span class="line">  <span class="keyword">where</span> B.cc <span class="operator">=</span> A.cc</span><br><span class="line">	);</span><br></pre></td></tr></table></figure>
+
+<p>当 B 小于 A，用 IN。因为 IN 是先从内层查出数据再给外层用。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span></span><br><span class="line"><span class="keyword">from</span> A</span><br><span class="line"><span class="keyword">where</span> cc <span class="keyword">in</span> (</span><br><span class="line">	<span class="keyword">select</span> cc</span><br><span class="line">  <span class="keyword">from</span> B</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-2-Select"><a href="#6-2-Select" class="headerlink" title="6.2 Select *"></a>6.2 Select *</h3><p>建议不要使用 select *，而是使用明确字段 select &lt;字段列表&gt;，原因：</p>
+<ol>
+<li>MySQL 在解析过程中，会通过查询数据字典将 * 转换成所有列名，这会耗费资源和时间。</li>
+<li>select * 无法使用覆盖索引。</li>
+</ol>
+<h3 id="6-3-Limit-1"><a href="#6-3-Limit-1" class="headerlink" title="6.3 Limit 1"></a>6.3 Limit 1</h3><p>针对会进行全表扫描的 SQL 语句，如果确定结果集只有一条数据，可以加上 limit 1，这样一来，当找到一条结果时就会停止扫描，可以加快查询速度。</p>
+<p>但如果表已经对字段建立了唯一索引，那么可以通过索引进行查询，本身就不会继续往后查找了，就不需要加上 limit 1 了。</p>
+<h2 id="7-数据库的主键如何设计"><a href="#7-数据库的主键如何设计" class="headerlink" title="7. 数据库的主键如何设计"></a>7. 数据库的主键如何设计</h2><h3 id="7-1-自增-id-或业务字段？"><a href="#7-1-自增-id-或业务字段？" class="headerlink" title="7.1 自增 id 或业务字段？"></a>7.1 自增 id 或业务字段？</h3><p>如果用自增的 id 作为主键，简单易懂，但是除了简单之外全是缺点：</p>
+<ol>
+<li>可靠性不高：存在自增 id 回溯的问题，直到 MySQL 8.0 才被修复。</li>
+<li>安全性不高：对外暴露的接口如 /User/1/ 可以让别人猜测出用户 ID 为多少或总用户有多少。</li>
+<li>性能差：自增 id 性能较差，因为需要在数据库服务器端生成。</li>
+<li>交互多：业务需要额外执行一次类似 last_insert_id() 的函数才能知道刚才插入的自增值，在海量并发的系统中，每多一条 SQL 就是多一次的开销。</li>
+<li>局部唯一性：最重要的一点，自增 id 是局部的唯一，只在当前数据库实例中唯一，而不是全局唯一。</li>
+</ol>
+<p>如果使用业务字段做主键，比如对于一个健身房的会员记录表，有卡号、姓名、电话、身份证等字段。</p>
+<p>如果用卡号做主键，实际中可能会出现卡号重复使用的情况。比如 A 离开了这个城市不再来了，把卡退还了，但是商家不想让这张卡空着，就把卡发给了 B。如果只是简单地修改了姓名、身份证等个人信息，虽然在系统层面上没有问题，但是这张卡以前的消费记录不会被修改，可能 A 以前消费过，但这条消费记录还在，而且卡的所有人变成了 B，而 B 没有消费过。</p>
+<p>用手机号或身份证？在实际生活中，手机号是可能被运营商收回，发给别人用的。而身份证属于个人隐私，客户不一定愿意透露。所以实际表中，手机号或身份证号可以是空的。</p>
+<p>所以尽量不要用跟业务相关的字段做主键，毕竟我们不能预测在项目的生命周期中，哪个字段可能会有重复、重用的情况出现。</p>
+<h3 id="7-2-推荐的主键设计"><a href="#7-2-推荐的主键设计" class="headerlink" title="7.2 推荐的主键设计"></a>7.2 推荐的主键设计</h3><p>对于非核心的业务，如日志、监控等信息，可以用对应表的自增 id 做主键。</p>
+<p><strong>对于核心业务，主键设计至少要是全局唯一且单调递增的。</strong></p>
+<p>最简单的设计是使用 UUID。</p>
+<p>MySQL 的 UUID 组成是：时间 + 版本（16 字节）+ 时钟序列（4 字节）+ MAC 地址（12 字节）+ 4 个连接符 （-） （4 字节）共 36 字节。其中时间是将时间低位放在最前面，时间高位放在最后面，这就导致 UUID 是随机无序的。</p>
+<p>通过改造 UUID，即将时间低位和时间高位互换，时间就变成单调递增的了，UUID 也变成单调递增了，这样 UUID 就是有序的了。而且 MySQL 8.0 还解决了 UUID 存在的空间占用的问题，去除了无意义的连接符“-”，并将字符串用二进制类型保存，这样一来存储空间变成了16字节。（原本是十六进制，则变成二进制后一个字节需要 4 bits，即 32 * 4 = 128 bits = 16 bytes）</p>
+<p>通过 <code>uuid_to_bin(@uuid,true)</code> 将 UUID 转化为有序 UUID，达到全局唯一且单调递增的效果。</p>
+<p>如果不是 MySQL 8.0，可以手动赋值字段做主键，参考淘宝的订单号设计：</p>
+<p>观察淘宝的订单号，可以发现对于一个用户来说，每个订单的订单号后 6 位都是一样的，淘宝的订单号设计应该是：时间 + 去重字段 + 用户 ID 后6位。这样的设计能做到全局唯一，而且对分布式系统查询友好。</p>
+<h2 id="8-大表优化"><a href="#8-大表优化" class="headerlink" title="8. 大表优化"></a>8. 大表优化</h2><p>当 MySQL 单表记录数过大，数据库的 CRUD 性能会明显下降，常见的优化措施如下：</p>
+<ol>
+<li>限定查询的范围：禁止不带任何限制数据范围条件的查询语句。比如在用户查询订单历史的时候，可以控制在一个月的范围内。</li>
+<li>读写分离：常见有一主一从和双主双从模式，主库负责写，从库负责读。双主时，两台主机是相互复制的。</li>
+<li>垂直拆分：当数据量达到千万级以上，可以把一个数据库切成多份，放到不同的服务器上，减少对单一服务器的访问压力。如果是数据库中的表太多，可以采用<strong>垂直分库</strong>，将关联的表部署在同一个服务器上。如果是表中的列太多，可以采用<strong>垂直分表</strong>，将一张表拆分成多张表，把经常一起使用的列放在同一张表里。</li>
+</ol>
+<p>垂直拆分的优点：可以使列数据变小，在查询时减少读取的 Block 数，减少 IO 次数，可以简化表的结构，易于维护。缺点：主键会出现冗余，需要管理冗余列，会引起 JOIN 操作，会让事务变得更复杂。</p>
+<ol start="4">
+<li>水平拆分：尽量控制单表数据量的大小，控制在 1000 万以内。水平分表可以将大的数据表按照某个属性维度拆分成不同的小表，每张小表保持相同的表结构，比如可以按照年份划分，把不同年份的数据放在不同的表中。水平分表仅解决了单一表数据过大的问题，但由于表的结构还是在同一台服务器上，其实对于提升并发能力没什么意义，所以水平拆分最好分库，从而达到分布式的目的。</li>
+</ol>
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2022/07/15/MySQL-Explain/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+                Ye Yang | 
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://hexo.io/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+  </body>
+</html>

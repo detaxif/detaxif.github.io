@@ -251,12 +251,12 @@
 </ul>
 <h2 id="7-操作索引"><a href="#7-操作索引" class="headerlink" title="7. 操作索引"></a>7. 操作索引</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"># 创建索引</span><br><span class="line"># 索引名称 index_name 是可以省略的，省略后，索引名称和索引列名相同</span><br><span class="line"></span><br><span class="line"># 创建普通索引</span><br><span class="line">create index index_name on table_name(col_name);</span><br><span class="line"></span><br><span class="line"># 创建唯一索引</span><br><span class="line">create unique index index_name on table_name(col_name);</span><br><span class="line"></span><br><span class="line"># 创建普通组合索引</span><br><span class="line">create index index_name on table_name(col_name_1, col_name_2);</span><br><span class="line"></span><br><span class="line"># 创建唯一组合索引</span><br><span class="line">create unique index index_name on table_name(col_name_1, col_name_2);</span><br><span class="line"></span><br><span class="line"># 修改表结构创建索引</span><br><span class="line">alter table table_name add index index_name(col_name);</span><br><span class="line"></span><br><span class="line"># 删除索引</span><br><span class="line"># 直接删除索引</span><br><span class="line">drop index index_name on table_name;</span><br><span class="line"></span><br><span class="line"># 修改表结构删除索引</span><br><span class="line">alter table table_name drop index index_name;</span><br></pre></td></tr></table></figure>
 
-<h2 id="8-最左前缀原则"><a href="#8-最左前缀原则" class="headerlink" title="8. 最左前缀原则"></a>8. 最左前缀原则</h2><p>在MySQL建立联合索引时，会遵守最左前缀原则。即最左优先，以最左边的为起点，任何连续的索引都能匹配上，同时遇到范围查询（&gt;, &lt;, between, like）就会停止匹配。</p>
+<h2 id="8-最左前缀匹配原则"><a href="#8-最左前缀匹配原则" class="headerlink" title="8. 最左前缀匹配原则"></a>8. 最左前缀匹配原则</h2><p>在MySQL建立联合索引时，会遵守最左前缀匹配原则。即最左优先，以最左边的为起点，任何连续的索引都能匹配上，同时遇到范围查询（&gt;, &lt;, between, like）就会停止匹配。</p>
 <p>比如有联合索引 (a, b, c)，where过滤条件中那些排列组合可以用到索引？（如 <code>where a = xxx b = xxx and c = xxx</code>）</p>
 <p>以下排列组合会走索引：a / ab / ac / ba / ca / abc / acb / bac / bca / cab / cba。即必须要有一个a，排列组合中的顺序会被优化器优化，所以不用关心顺序。</p>
 <p>以下排列组合不会走索引：b / c / bc / cb。因为没有a。</p>
 <p><code>a = xxx and b &lt; 10 and b &gt; 5 and c = xxx</code> 这种情况，c字段用不到索引，因为b是一个范围查询，遇到范围查询就停止匹配了。</p>
-<h3 id="8-1-最左前缀原则原理"><a href="#8-1-最左前缀原则原理" class="headerlink" title="8.1 最左前缀原则原理"></a>8.1 最左前缀原则原理</h3><p>索引的底层是一颗B+树，联合索引当然也是一颗B+树，只不过联合索引的键值数量不是一个而是多个。构建一颗B+树只能根据一个值来构建，因此数据库依据联合索引最左的字段来构建B+树。</p>
+<h3 id="8-1-最左前缀匹配原则原理"><a href="#8-1-最左前缀匹配原则原理" class="headerlink" title="8.1 最左前缀匹配原则原理"></a>8.1 最左前缀匹配原则原理</h3><p>索引的底层是一颗B+树，联合索引当然也是一颗B+树，只不过联合索引的键值数量不是一个而是多个。构建一颗B+树只能根据一个值来构建，因此数据库依据联合索引最左的字段来构建B+树。</p>
 <p>假如创建一个 (a, b) 的联合索引，那么它的索引树是这样的：</p>
 <p><img src="img4.png" alt="img4"></p>
 <p>可见a的值是有顺序的：1, 1, 2, 2, 3, 3, 3, 3。b的值是没有顺序的：1, 2, 2, 5, 1, 2, 3, 5。所以 b = 2 这种查询条件无法利用索引，因为联合索引首先是按a排序的，b是无序的。</p>
@@ -266,10 +266,58 @@
 <p>通俗地讲就是，如果select所需获得的列中有大量的非索引列，索引就需要到表中二次查找获得相应的列的信息，这就叫回表。</p>
 <p>我们应该避免回表，方法就是使用覆盖索引，即索引中包含了查询中的所有字段。如果索引的列在select所需获得的列中，或者根据一次索引查询就能获得记录，这种情况就不需要进行回表查询了。</p>
 <h2 id="11-索引下推"><a href="#11-索引下推" class="headerlink" title="11. 索引下推"></a>11. 索引下推</h2><p>索引下推 / Index Condition Pushdown / ICP，是MySQL 5.6后的新特性。</p>
-<p>举例说明：现有表person，其中有3个字段，id name age ，其中id为主键，创建联合索引 (name, age)。</p>
-<p>表中有两条数据：{2, ab, 2} 以及 {15, ab, 15}。现在我们要检索出名字为ab且年龄为2的用户。sql语句：<code>select * from person where name = &#39;ab&#39; and age = 2</code>。</p>
+<p>例 1 ：现有表 person，其中有3个字段，id name age ，其中id为主键，创建联合索引 (name, age)。</p>
+<p>表中有两条数据：{2, ab, 2} 以及 {15, ab, 15}。现在我们要检索出名字为ab且年龄为2的用户。</p>
+<p>查询语句：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> </span><br><span class="line"><span class="keyword">from</span> person </span><br><span class="line"><span class="keyword">where</span> name <span class="operator">=</span> <span class="string">&#x27;ab&#x27;</span> </span><br><span class="line"><span class="keyword">and</span> age <span class="operator">=</span> <span class="number">2</span></span><br></pre></td></tr></table></figure>
+
 <p>不使用索引下推的话，存储引擎根据联合索引找到 name = ‘ab’ 的主键id (2, 15)，逐一进行回表扫描，去聚簇索引找到完整的行记录，再对数据根据 age = 2 进行筛选。则进行了两次回表，把联合索引的另一个字段age浪费了。</p>
 <p>使用索引下推的话，存储引擎根据联合索引，找到 name = ‘ab’，由于联合索引包含age列，所以存储引擎直接在联合索引里根据 age = 2 筛选，判断后再进行回表查询。即只进行了一次回表。</p>
+<p>例 2 ：现有表 person，其中有字段 id, zipcode, firstname, lastname, address，id 为主键，有联合索引 (zipcode, lastname, firstname)。</p>
+<p>查询语句：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span></span><br><span class="line"><span class="keyword">from</span> person</span><br><span class="line"><span class="keyword">where</span> zipcode <span class="operator">=</span> <span class="string">&#x27;000001&#x27;</span></span><br><span class="line"><span class="keyword">and</span> lastname <span class="keyword">like</span> <span class="string">&#x27;%Yang%&#x27;</span></span><br><span class="line"><span class="keyword">and</span> address <span class="keyword">like</span> <span class="string">&#x27;%Shenzhen%&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>不使用索引下推的话，因为模糊查询用占位符作为首位，索引只用到了 zipcode。查询出满足 zipcode = ‘000001’ 条件的记录比如有 1000 条，然后进行 1000 次回表做进一步过滤，到最后得到 10 条满足三个条件的数据。</p>
+<p>使用索引下推的话，因为索引中包含 lastname 字段，则可以在满足 zipcode = ‘000001’ 这个条件的 1000 条记录中判断满不满足 lastname like ‘%Yang%’，发现两个条件过滤后只剩 100 条记录，然后根据这 100 条数据做 100 次回表查询，最后得到满足三个条件的 10 条记录。</p>
+<h2 id="12-索引失效"><a href="#12-索引失效" class="headerlink" title="12. 索引失效"></a>12. 索引失效</h2><p>在以下场景中，会出现索引失效的问题：</p>
+<ol>
+<li>联合索引不满足最左前缀匹配原则</li>
+<li>使用了 <code>select *</code></li>
+<li>索引列参与运算</li>
+</ol>
+<p>索引列参与运算会导致全表扫描，找到所有的id字段再进行计算，再与参数值进行比较。如 <code>select * from user where id + 1 = 2</code> 可以改成先在内存中算好预期的值  <code>where id = 1</code> 或在等号右边进行计算 <code>where id = 2 - 1</code></p>
+<ol start="4">
+<li>索引列使用了函数</li>
+</ol>
+<p>和第三种情况一样，数据库会先进行全表扫描，获得数据后再进行截取或计算，导致索引失效。如 <code>select * from user where SUBSTR(id,1,3) = &#39;100&#39;</code> </p>
+<ol start="5">
+<li>使用 LIKE 模糊查询时占位符放在首部</li>
+</ol>
+<p>因为索引本身通过字符串从左到右逐个排序，如果在条件首部使用占位符，就导致无法按照正常的目录进行排序，导致索引失效。如 <code>where name like &#39;%a&#39;</code></p>
+<ol start="6">
+<li>发生类型隐式转换</li>
+</ol>
+<p>如有一个字段 <code>name</code> 类型为varchar，sql查询语句为 <code>select * from user where name = 123</code> ，解决方法就是将123用引号括起来 <code>where name = &#39;123&#39;</code></p>
+<ol start="7">
+<li>使用OR时，其中一个字段没有创建索引</li>
+</ol>
+<p><code>select * from user where id = 2 or username = &#39;Tom&#39;</code> 其中username没有创建索引。</p>
+<ol start="8">
+<li>两列数据做比较</li>
+</ol>
+<p>即使两列数据都有索引，但在查询条件中对两列数据进行比较操作，就会导致索引失效 <code>select * from user where id &gt; age</code></p>
+<ol start="9">
+<li>范围条件右边的索引失效</li>
+</ol>
+<p>最左前缀匹配原则，从联合索引的最左边为起点，遇到范围查询则停止匹配。建立联合索引时，如果一个字段经常用范围查询条件过滤，可以把这个字段放在联合索引的最右边，如sql查询语句为 <code>select * from student where age = 30 and name = &#39;abc&#39; and classId &gt; 20</code> 则建立索引时应该这样写 <code>create index idx_age_name_cid on student(age, name, classId)</code> </p>
+<ol start="10">
+<li>不等于比较</li>
+</ol>
+<p>当查询条件为字符串时，使用 &lt;&gt; 或 != 作为条件查询，则有可能不走索引。当返回的结果集很小，在总数据中的占比很小时，会走索引。当返回的结果集很大，在总数据中占比很大，就不走索引，而是选择更有效率的全表扫描。</p>
+<ol start="11">
+<li>is not null</li>
+</ol>
+<p>is null可以触发索引，但is not null不可以。同理，not like也不能使用索引，会导致全表扫描。</p>
 
 </div> 
 
@@ -281,6 +329,11 @@
     <nav class="post-nav">
         <div class="prev-item">
            
+                <div class="icon arrow-left"></div>
+                <div class="post-link">
+                    <a href="/2022/07/15/MySQL-Explain/">Prev</a>
+                </div>
+            
         </div>
         <div class="next-item">
             
