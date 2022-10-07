@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ch">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="yeung">
+
+
+
+
+
+
+
+<title>MySQL-MVCC | YE&#39;s BLOG</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+
+
+
+  <meta name="generator" content="Hexo 5.4.1"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">Ultralight Beam.</a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archives</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/about/">About</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/tag/">Tags</a>
+              </li> 
+                   
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/MySQL/">
+                            MySQL
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                MySQL-MVCC
+            
+            
+        </div>
+        <span class="post-date">
+            07 21, 2022
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h1 id="MySQL-MVCC"><a href="#MySQL-MVCC" class="headerlink" title="MySQL-MVCC"></a>MySQL-MVCC</h1><h2 id="1-什么是-MVCC"><a href="#1-什么是-MVCC" class="headerlink" title="1. 什么是 MVCC"></a>1. 什么是 MVCC</h2><p>Multiversion Concurrency Control / 多版本并发控制，是通过数据行的多个版本管理来实现数据库的并发控制。这项技术使得在 InnoDB 的事务隔离级别下执行一致性读操作有了保证。就是为了查询一些正在被另一个事务更新的行，并且可以看到它们被更新之前的值，这样在查询的时候就不用等待另一个事务释放锁。</p>
+<p><strong>MVCC 的实现依赖于：隐藏字段、Undo Log、ReadView。</strong></p>
+<h2 id="2-快照读与当前读"><a href="#2-快照读与当前读" class="headerlink" title="2. 快照读与当前读"></a>2. 快照读与当前读</h2><p>MVCC 在 InnoDB 中的实现主要是为了提高数据库并发性能，用更好的方式去处理读写冲突，做到即使有读写冲突时也不用加锁，实现非阻塞并发读，这个读就是快照读，而非当前读。当前读实际上是一种加锁的操作，是悲观锁的实现，而 MVCC 本质上是采用乐观锁思想的一种方式。</p>
+<h3 id="2-1-快照读"><a href="#2-1-快照读" class="headerlink" title="2.1 快照读"></a>2.1 快照读</h3><p>快照读又叫一致性读，读取的是快照数据。<strong>不加锁的简单的 SELECT 都属于快照读</strong>，即不加锁的非阻塞读，如：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> test <span class="keyword">where</span> ...</span><br></pre></td></tr></table></figure>
+
+<p>之所以出现快照读，是基于提高并发性能的考虑。快照读的实现是基于 MVCC，它在很多情况下避免了加锁操作，降低了开销。既然是基于多版本，那么快照读可能读到的并不是数据的最新版本，可能是之前的历史版本。快照读的前提是隔离级别不是串行级别，串行级别下的快照读会退化成当前读。</p>
+<h3 id="2-2-当前读"><a href="#2-2-当前读" class="headerlink" title="2.2 当前读"></a>2.2 当前读</h3><p>当前读读取的是记录的最新版本，读取时还要保证其它并发事务不能修改当前记录，会对读取的记录进行加锁。<strong>加锁的 SELECT 或者对数据进行增删改都属于当前读</strong>，如：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> student lock <span class="keyword">in</span> share mode # 共享锁</span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> student <span class="keyword">for</span> <span class="keyword">update</span> # 排他锁</span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> student <span class="keyword">values</span> ... # 排他锁</span><br><span class="line"><span class="keyword">delete</span> <span class="keyword">from</span> student <span class="keyword">where</span> ... # 排他锁</span><br><span class="line"><span class="keyword">update</span> student <span class="keyword">set</span> ... # 排他锁</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-隐藏字段与-Undo-Log-版本链"><a href="#3-隐藏字段与-Undo-Log-版本链" class="headerlink" title="3. 隐藏字段与 Undo Log 版本链"></a>3. 隐藏字段与 Undo Log 版本链</h2><p>对于使用 InnoDB 存储引擎的表来说，它的聚簇索引记录中都包含两个必要的隐藏列：</p>
+<ol>
+<li>trx_id：每次一个事务对某条聚簇索引记录进行改动时，都会把该事务的事务 id 赋值给 trx_id 隐藏列。</li>
+<li>roll_pointer：每次对某条聚簇索引记录进行改动时，都会把旧的版本写入到 undo 日志中，然后这个隐藏列就相当于一个指针，可以通过它来找到该记录修改前的信息。</li>
+</ol>
+<p>例：现有表 student，其中有字段 (id, name, class)，表里只有一条数据 (1, ‘张三’, ‘一班’)，插入该条记录的事务 id 为 8。</p>
+<p>假设之后两个事务 id 分别为 10 和 20 的事务对这条记录进行 UPDATE 操作，流程如下：</p>
+<table>
+<thead>
+<tr>
+<th>时间顺序</th>
+<th>事务 10</th>
+<th>事务 20</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>BEGIN;</td>
+<td></td>
+</tr>
+<tr>
+<td>2</td>
+<td></td>
+<td>BEGIN;</td>
+</tr>
+<tr>
+<td>3</td>
+<td>update student set name = ‘李四’ where id = 1;</td>
+<td></td>
+</tr>
+<tr>
+<td>4</td>
+<td>update student set name = ‘王五’ where id = 1;</td>
+<td></td>
+</tr>
+<tr>
+<td>5</td>
+<td>COMMIT;</td>
+<td></td>
+</tr>
+<tr>
+<td>6</td>
+<td></td>
+<td>update student set name = ‘钱七’ where id = 1;</td>
+</tr>
+<tr>
+<td>7</td>
+<td></td>
+<td>update student set name = ‘宋八’ where id = 1;</td>
+</tr>
+<tr>
+<td>8</td>
+<td></td>
+<td>COMMIT;</td>
+</tr>
+</tbody></table>
+<p>每次对记录进行改动，都会记录一条 undo 日志，每条日志里有一个 roll_pointer 属性（insert 操作对应的 undo 日志没有该属性，因为该记录没有更早的版本），可以将这些 undo 日志连起来形成一个版本链：</p>
+<p><img src="img.PNG" alt="img"></p>
+<h2 id="4-ReadView"><a href="#4-ReadView" class="headerlink" title="4. ReadView"></a>4. ReadView</h2><h3 id="4-1-什么是-ReadView"><a href="#4-1-什么是-ReadView" class="headerlink" title="4.1 什么是 ReadView"></a>4.1 什么是 ReadView</h3><p>在 MVCC 中，多个事务对同一个行记录进行更新会产生多个历史快照，这些快照保存在 Undo Log 里，如果一个事务想要查询这个行记录，需要读取哪一个版本的行记录呢？这时就要用到 ReadView 了，它解决了行的可见性问题。</p>
+<p>ReadView 就是一个事务在使用 MVCC 机制进行快照读操作时产生的读视图。当事务启动后，会生成一个数据库系统当前的快照，InnoDB 为每一个事务构造了一个数组，用来记录并维护系统当前活跃事务（启动了但还没提交的事务）的 id。</p>
+<h3 id="4-2-设计思路"><a href="#4-2-设计思路" class="headerlink" title="4.2 设计思路"></a>4.2 设计思路</h3><p>MVCC 主要是针对 Read Committed 和 Repeatable Read 两种隔离级别的事务。因为对于 Read Uncommitted 的事务，它可以读到未提交事务修改过的记录，所以直接读取记录的最新版本就可以了。对于 Serializable 的事务，它是排队串行化的，读的肯定是最新的记录了。</p>
+<p>ReadView 解决的主要问题，就是对于使用 RC 和 RR 隔离级别的事务，判断版本链中的哪个版本是当前事务可见的，必须保证读到已提交的事务修改过的记录。</p>
+<p>ReadView 中主要有 4 个比较重要的内容：</p>
+<ol>
+<li>creator_trx_id：创建这个 ReadView 的事务 id。只有在对表中的记录做改动，即增删改时，才会为事务分配事务 id，在一个只读事务中的事务 id 值默认为 0。</li>
+<li>trx_ids：在生成 ReadView 时当前系统中活跃（启动了但还没提交）的读写事务的事务 id 列表。</li>
+<li>up_limit_id：活跃的事务中最小的事务 id。</li>
+<li>low_limit_id：生成 ReadView 时，系统中应该分配给下一个事务的 id 值。即当前系统中最大的事务 id + 1。</li>
+</ol>
+<p>例：现在系统中有四个活跃事务 trx2、trx3、trx5、trx8。</p>
+<p>trx_ids 就是 trx2、trx3、trx5、trx8 的集合，up_limit_id 是 trx2，low_limit_id 是 trx8 + 1。</p>
+<h3 id="4-3-ReadView-的规则"><a href="#4-3-ReadView-的规则" class="headerlink" title="4.3 ReadView 的规则"></a>4.3 ReadView 的规则</h3><p>有了 ReadView，在访问某条记录的时候，就可以按照以下步骤判断记录的某个版本是否可见，可以以上文对 student 表更改 name 字段的操作为例：</p>
+<ul>
+<li>如果被访问版本的 trx_id 与 ReadView 中的 creator_trx_id 相同，说明当前事务在访问它自己修改过的记录，所以该版本可以被当前事务访问。</li>
+<li>如果被访问版本的 trx_id 小于 ReadView 中的 up_limit_id，说明生成该版本的事务在当前事务生成 ReadView 前已经提交，所以该版本可以被当前事务访问。</li>
+<li>如果被访问版本的 trx_id 大于或等于 ReadView 中的 low_limit_id，说明生成该版本的事务在当前事务生成 ReadView之后才开启，所以该版本不可以被当前事务访问。</li>
+<li>如果被访问版本的 trx_id 在 ReadView 的 up_limit_id 和 low_limit_id 之间，那么需要判断 trx_id 是否在 trx_ids 列表中。如果在，说明创建 ReadView 时生成该版本的事务还是活跃的，该版本不可以被访问。如果不在，说明生成该版本的事务已经提交，该版本可以被访问。</li>
+</ul>
+<h3 id="4-4-MVCC-操作流程"><a href="#4-4-MVCC-操作流程" class="headerlink" title="4.4 MVCC 操作流程"></a>4.4 MVCC 操作流程</h3><p>当查询一条记录时，系统通过 MVCC 找到它的流程：</p>
+<ol>
+<li>首先获取该事务的版本号，也就是事务 id。</li>
+<li>获取 ReadView。</li>
+<li>查询得到的数据，与 ReadView 中的事务版本号进行比较。</li>
+<li>如果不符合 ReadView 规则，就沿着 Undo Log 版本链往下获取下一个版本的历史快照，按照上文的规则判断可见性。</li>
+<li>最后返回符合规则的数据。</li>
+</ol>
+<p>如果直到版本链的最后一个版本都是不可见的，说明该记录对该事务完全不可见，查询结果就不包含该记录。</p>
+<p>当隔离级别为 Read Committed 时，一个事务中，每一次 Select 查询都会重新获取一次 ReadView。即使是同样的查询语句也会重新获取一次 ReadView，这时如果 ReadView 不同，就可能出现不可重复读或幻读的情况。</p>
+<p>当隔离级别为 Repeatable Read 时，为了避免出现不可重复读的情况，一个事务只在第一次 Select 时获取一次 ReadView，后面所有的 Select 都会复用这个 ReadView。</p>
+<h2 id="5-总结"><a href="#5-总结" class="headerlink" title="5. 总结"></a>5. 总结</h2><p>通过 MVCC 我们可以解决：</p>
+<ol>
+<li>读写之间阻塞的问题：通过 MVCC 让读写互相不阻塞，即读不阻塞写，写不阻塞读，提升事务并发处理能力。</li>
+<li>降低了死锁的概率：MVCC 采用乐观锁的方式，读取数据时不需要加锁，对于写操作，也只锁定必要的行。</li>
+<li>快照读的问题：当我们查询数据库在某个时间点的快照时，只能看到这个时间点之前事务提交的更新结果，而不能看到这个时间点之后事务提交的更新结果。</li>
+</ol>
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2022/07/18/MySQL-%E4%BC%98%E5%8C%96/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+                Ye Yang | 
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://hexo.io/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+  </body>
+</html>
