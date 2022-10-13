@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ch">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="yeung">
+
+
+
+
+
+
+
+<title>Shell编程 | YE&#39;s BLOG</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+
+
+
+  <meta name="generator" content="Hexo 5.4.1"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">Ultralight Beam.</a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archives</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/about/">About</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/tag/">Tags</a>
+              </li> 
+                   
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/Shell%E7%BC%96%E7%A8%8B/">
+                            Shell编程
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                Shell编程
+            
+            
+        </div>
+        <span class="post-date">
+            07 29, 2022
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h1 id="Shell-编程"><a href="#Shell-编程" class="headerlink" title="Shell 编程"></a>Shell 编程</h1><h2 id="1-Shell-是什么"><a href="#1-Shell-是什么" class="headerlink" title="1. Shell 是什么"></a>1. Shell 是什么</h2><p>Shell 是一个命令行解释器，它为用户提供了一个向 Linux 内核发送请求以便运行程序的界面系统级程序，用户可以用 Shell 来启动、挂起、停止或者编写一些程序。简单来说，就是把我们输入的命令解释给 Linux 内核，再把结果返回给我们的界面。</p>
+<h2 id="2-Shell-脚本入门"><a href="#2-Shell-脚本入门" class="headerlink" title="2. Shell 脚本入门"></a>2. Shell 脚本入门</h2><ul>
+<li><strong>脚本格式要求</strong></li>
+</ul>
+<ol>
+<li>脚本以 <code>#!/bin/bash</code> 开头</li>
+<li>脚本需要有可执行权限</li>
+</ol>
+<ul>
+<li><strong>编写一个 Shell 脚本 hello.sh</strong></li>
+</ul>
+<p><code>vim hello.sh</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line">echo &quot;hello world!&quot;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>脚本的常用执行方式</strong></li>
+</ul>
+<ol>
+<li>输入脚本的绝对路径或相对路径，但是需要赋予脚本文件 x 权限 <code>chmod u+x hello.sh</code>，如 <code>./hello.sh</code> 或 <code>/root/shcode/hello.sh</code></li>
+<li>sh + 脚本，这种方式不需要赋予脚本 x 权限，直接执行即可，如 <code>sh hello.sh</code></li>
+</ol>
+<ul>
+<li>注释</li>
+</ul>
+<ol>
+<li>单行注释：<code># xxxx</code></li>
+<li>多行注释：<code>:&lt;&lt;! xxxx !</code></li>
+</ol>
+<h2 id="3-Shell-中的变量"><a href="#3-Shell-中的变量" class="headerlink" title="3. Shell 中的变量"></a>3. Shell 中的变量</h2><h3 id="3-1-变量基础"><a href="#3-1-变量基础" class="headerlink" title="3.1 变量基础"></a>3.1 变量基础</h3><ul>
+<li><strong>Shell 变量介绍</strong></li>
+</ul>
+<ol>
+<li>Linux Shell 中的变量分为系统变量和用户自定义变量。</li>
+<li>系统变量包括 $HOME, $PWD, $SHELL, $USER 等。</li>
+<li>使用 <code>set</code> 命令显示当前 Shell 中的所有变量</li>
+</ol>
+<ul>
+<li><strong>自定义变量</strong></li>
+</ul>
+<ol>
+<li>定义变量：<code>变量=值</code>。</li>
+<li>撤销变量：<code>unset 变量</code></li>
+<li>声明静态变量：<code>readonly 变量</code>，它是不能被 unset 删除的。</li>
+</ol>
+<ul>
+<li><strong>定义变量的规则</strong></li>
+</ul>
+<ol>
+<li>变量名称可以由字母、数字和下划线组成，但不能以数字开头。</li>
+<li>等号两侧不能有空格。</li>
+<li>变量名称一般习惯为大写。</li>
+</ol>
+<ul>
+<li><strong>如何将命令的返回值赋给变量</strong></li>
+</ul>
+<ol>
+<li>使用反引号，A=`date` ，运行反引号里面的命令，并将结果返回给变量 A。</li>
+<li><code>A=$(date)</code> 等价于反引号。</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">定义变量A</span></span><br><span class="line">A=100</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">输出变量</span></span><br><span class="line">echo A=$A</span><br><span class="line">echo &quot;A=$A&quot;</span><br><span class="line"><span class="meta"># </span><span class="language-bash">执行后输出：A=100</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">撤销变量A</span></span><br><span class="line">unset A</span><br><span class="line">echo A=$A</span><br><span class="line"><span class="meta"># </span><span class="language-bash">执行后输出：A=</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">声明静态变量B=2</span></span><br><span class="line">readonly B=2</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-环境变量"><a href="#3-2-环境变量" class="headerlink" title="3.2 环境变量"></a>3.2 环境变量</h3><ul>
+<li><strong>基本语法</strong></li>
+</ul>
+<ol>
+<li>将 Shell 变量输出为环境变量 / 全局变量：<code>export 变量名=变量值</code></li>
+<li>让修改后的配置信息立即生效：<code>source 配置文件</code></li>
+<li>查询环境变量的值：<code>echo $变量名</code></li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta"># </span><span class="language-bash">在/etc/profile文件中定义环境变量TOMCAT_HOME</span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">TOMCAT路径为/opt/tomcat</span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">vim /etc/profile</span></span><br><span class="line">export TOMCAT_HOME=/opt/tomcat</span><br><span class="line"><span class="meta"># </span><span class="language-bash">保存退出后让配置生效</span></span><br><span class="line">source /etc/profile</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">然后就可以在别的sh文件中使用环境变量</span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">比如在hello.sh中</span></span><br><span class="line">echo &quot;tomcat_home=$TOMCAT_HOME&quot;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-3-传参"><a href="#3-3-传参" class="headerlink" title="3.3 传参"></a>3.3 传参</h3><ul>
+<li><strong>基本语法</strong></li>
+</ul>
+<ol>
+<li>$n：n 为数字，$0 代表调用这个sh的命令本身，$1 - $9 代表命令传进来的第一到第九个参数，第十个及以上的参数需要用大括号包裹起来，如 ${10}。</li>
+<li>$*：代表命令传进来的所有参数，把所有参数看作一个整体。</li>
+<li>$@：也代表传进来的所有参数，不过 $@ 把每个参数区分对待。</li>
+<li>$#：代表命令传进来的参数个数。</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">vim myShell.sh</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line">echo &quot;command=$0 arg1=$1 arg2=$2&quot;</span><br><span class="line">echo &quot;所有参数=$*&quot;</span><br><span class="line">echo &quot;所有参数=$@&quot;</span><br><span class="line">echo &quot;参数个数=$#&quot;</span><br><span class="line"></span><br><span class="line">./myShell.sh 100 200</span><br><span class="line"><span class="meta"># </span><span class="language-bash">输出</span></span><br><span class="line"><span class="meta"># </span><span class="language-bash"><span class="built_in">command</span>=./myShell.sh arg1=100 arg2=200</span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">所有参数=100 200</span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">所有参数=100 200</span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">参数个数=2</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-4-预定义变量"><a href="#3-4-预定义变量" class="headerlink" title="3.4 预定义变量"></a>3.4 预定义变量</h3><p>预定义变量就是 Shell 设计者事先已经定义好的变量，可以直接在 Shell 脚本中使用。</p>
+<ul>
+<li><strong>基本语法</strong></li>
+</ul>
+<ol>
+<li>$$：代表当前进程的进程号。</li>
+<li>$!：代表后台运行的最后一个进程的进程号。</li>
+<li>$?：代表最后一次执行的命令的返回状态。返回 0 代表上一个命令正确执行，非 0 代表上一个命令执行不正确。</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">vim preVar.sh</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line">echo &quot;当前执行的进程id=$$&quot;</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="language-bash">用 &amp; 以后台运行的方式运行一个脚本，并获取它的进程号</span></span><br><span class="line">/root/shcode/myShell.sh &amp;</span><br><span class="line">echo &quot;最后一个后台方式运行的进程id=$!&quot;</span><br><span class="line">echo &quot;执行的结果是=$?&quot;</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">输出</span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">当前执行的进程<span class="built_in">id</span>=16392</span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">最后一个后台方式运行的进程<span class="built_in">id</span>=16393</span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">执行的结果是=0</span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">下面是后台运行的脚本的输出</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="4-运算符"><a href="#4-运算符" class="headerlink" title="4. 运算符"></a>4. 运算符</h2><ul>
+<li><strong>基本语法</strong></li>
+</ul>
+<ol>
+<li>在 Shell 中进行运算操作有三种方式：<code>$((运算式))</code> 或者 <code>$[运算式]</code> 或者 <code>expr m + n</code>，推荐使用第二种 <code>$[]</code>。</li>
+<li>如果使用 expr，注意运算符之间要有空格，否则会被认为是一个整体字符串而不是运算式。</li>
+<li>如果希望将 expr 的结果赋给某个变量，使用一对反引号 `` 括起来。</li>
+<li>expr 中的乘、除、取余分别是 \*、/、%。</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">vim oper.sh</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">案例1：计算(2+3)*4</span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">方式1：</span></span><br><span class="line">RES1=$(((2+3)*4))</span><br><span class="line">echo &quot;res1=$RES1&quot;</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">方式2: 推荐使用</span></span><br><span class="line">RES2=$[(2+3)*4]</span><br><span class="line">echo &quot;res2=$RES2&quot;</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">方式3:</span></span><br><span class="line">TEMP=`expr 2 + 3`</span><br><span class="line">RES3=`expr $TEMP \* 4`</span><br><span class="line">echo &quot;res3=$RES3&quot;</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">案例2: 求出命令传进来的两个参数的和</span></span><br><span class="line">SUM=$[$1+$2]</span><br><span class="line">echo &quot;sum=$SUM&quot;</span><br><span class="line"><span class="meta"># </span><span class="language-bash">./oper.sh 20 50</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="5-流程控制"><a href="#5-流程控制" class="headerlink" title="5. 流程控制"></a>5. 流程控制</h2><h3 id="5-1-单分支条件判断"><a href="#5-1-单分支条件判断" class="headerlink" title="5.1 单分支条件判断"></a>5.1 单分支条件判断</h3><ol>
+<li><code>if [ condition ] then xxx fi</code></li>
+<li><code>[ condition ] &amp;&amp; echo OK </code> 短路与，只有条件判断成功了才会执行后面的命令。</li>
+</ol>
+<p>注意条件和中括号前后都要有空格</p>
+<ul>
+<li><strong>常用判断条件</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>条件</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>=</td>
+<td>用于字符串比较，判断字符串是否相等</td>
+</tr>
+<tr>
+<td>-lt</td>
+<td>小于</td>
+</tr>
+<tr>
+<td>-le</td>
+<td>小于等于</td>
+</tr>
+<tr>
+<td>-eq</td>
+<td>等于</td>
+</tr>
+<tr>
+<td>-gt</td>
+<td>大于</td>
+</tr>
+<tr>
+<td>-ge</td>
+<td>大于等于</td>
+</tr>
+<tr>
+<td>-ne</td>
+<td>不等于</td>
+</tr>
+<tr>
+<td>-r</td>
+<td>有读的权限</td>
+</tr>
+<tr>
+<td>-w</td>
+<td>有写的权限</td>
+</tr>
+<tr>
+<td>-x</td>
+<td>有执行的权限</td>
+</tr>
+<tr>
+<td>-f</td>
+<td>文件存在并且是一个常规文件</td>
+</tr>
+<tr>
+<td>-e</td>
+<td>文件存在</td>
+</tr>
+<tr>
+<td>-d</td>
+<td>文件存在且是一个目录</td>
+</tr>
+</tbody></table>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">vim ifdemo.sh</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">案例1: <span class="string">&quot;ok&quot;</span> 是否等于 <span class="string">&quot;ok&quot;</span></span></span><br><span class="line">if [ &quot;ok&quot; = &quot;ok&quot; ]</span><br><span class="line">then</span><br><span class="line">		echo &quot;equals&quot;</span><br><span class="line">fi</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">案例2: 23 是否大于等于 22</span></span><br><span class="line">if [ 23 -ge 22 ]</span><br><span class="line">then</span><br><span class="line">		echo &quot;true&quot;</span><br><span class="line">fi</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">案例3: /root/shcode/aaa.txt 文件是否存在</span></span><br><span class="line">if [ -f /root/shcode/aaa.txt ]</span><br><span class="line">then</span><br><span class="line">		echo &quot;exists&quot;</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-2-多分支条件判断"><a href="#5-2-多分支条件判断" class="headerlink" title="5.2 多分支条件判断"></a>5.2 多分支条件判断</h3><p><code> if [ condition ] then xxx elif [ condition ] then xxx fi</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">如果输入的参数大于等于 60 输出及格了，否则输出不及格</span></span><br><span class="line">if [ $1 -ge 60 ]</span><br><span class="line">then</span><br><span class="line">		echo &quot;及格了&quot;</span><br><span class="line">elif [ $1 -lt 60 ]</span><br><span class="line">then</span><br><span class="line">		echo &quot;不及格&quot;</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-3-case-语句"><a href="#5-3-case-语句" class="headerlink" title="5.3 case 语句"></a>5.3 case 语句</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta"># </span><span class="language-bash">基本语法</span></span><br><span class="line">case $variable in</span><br><span class="line">&quot;value1&quot;) # variable = value1</span><br><span class="line">xxx</span><br><span class="line">;;</span><br><span class="line">&quot;value2&quot;)</span><br><span class="line">xxx</span><br><span class="line">;;</span><br><span class="line">*) # variable 不是以上的值</span><br><span class="line">xxx</span><br><span class="line">;;</span><br><span class="line">esac</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">案例：当参数是 1 输出 周一，是 2 输出 周二，其他情况输出 other</span></span><br><span class="line">vim testCase.sh</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line">case $1 in</span><br><span class="line">&quot;1&quot;)</span><br><span class="line">echo &quot;周一&quot;</span><br><span class="line">;;</span><br><span class="line">&quot;2&quot;)</span><br><span class="line">echo &quot;周二&quot;</span><br><span class="line">;;</span><br><span class="line">*)</span><br><span class="line">echo &quot;other&quot;</span><br><span class="line">;;</span><br><span class="line">esac</span><br><span class="line"></span><br><span class="line">chmod u+x testCase.sh</span><br><span class="line">./testCase.sh 1</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-4-for-循环"><a href="#5-4-for-循环" class="headerlink" title="5.4 for 循环"></a>5.4 for 循环</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta"># </span><span class="language-bash">基本语法</span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">方式1</span></span><br><span class="line">for 变量 in v1 v2 ...</span><br><span class="line">do</span><br><span class="line">	xxx</span><br><span class="line">done</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">方式2</span></span><br><span class="line">for ((初始值; 循环控制条件; 变量变化))</span><br><span class="line">do</span><br><span class="line">	xxx</span><br><span class="line">done</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">案例1：打印命令传进来的参数</span></span><br><span class="line">vim testFor.sh</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line">for i in &quot;$*&quot;</span><br><span class="line">do</span><br><span class="line">	echo &quot;num is $i&quot;</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line">./testFor.sh 100 200 300</span><br><span class="line"><span class="meta"># </span><span class="language-bash">输出 <span class="string">&quot;num is 100 200 300&quot;</span></span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">用 $*，只会输出一行，因为它把所有参数看作一个整体，所以只跑一次循环。</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line">for i in &quot;$@&quot;</span><br><span class="line">do</span><br><span class="line">	echo &quot;num is $i&quot;</span><br><span class="line">done</span><br><span class="line">./testFor.sh 100 200 300</span><br><span class="line"><span class="meta"># </span><span class="language-bash">输出 num is 100</span></span><br><span class="line"><span class="meta">#</span><span class="language-bash">			num is 200</span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">		num is 300</span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">用 <span class="variable">$@</span> 会输出三行，每个参数是独立的。</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">案例2：计算从 1 到 100 的和</span></span><br><span class="line"><span class="meta">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line">SUM=0</span><br><span class="line">for((i=1;i&lt;=100;i++))</span><br><span class="line">do</span><br><span class="line">	SUM=$[$SUM+$i]</span><br><span class="line">done</span><br><span class="line">echo &quot;sum=$SUM&quot;</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-5-while-循环"><a href="#5-5-while-循环" class="headerlink" title="5.5 while 循环"></a>5.5 while 循环</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta"># </span><span class="language-bash">基本语法</span></span><br><span class="line">while [ condtion ] # 注意空格</span><br><span class="line">do</span><br><span class="line">	xxx</span><br><span class="line">done</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">案例：命令传进一个参数 n，计算从 1 到 n 的和</span></span><br><span class="line">vim testWhile.sh</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line">SUM=0</span><br><span class="line">i=1</span><br><span class="line">while [ $i -le n ]</span><br><span class="line">do</span><br><span class="line">	SUM=$[$SUM+$i]</span><br><span class="line">	i=$[$i+1]</span><br><span class="line">done</span><br><span class="line">echo &quot;sum=$SUM&quot;</span><br><span class="line"></span><br><span class="line">chmod u+x testWhile.sh </span><br><span class="line">./testWhile.sh 10</span><br></pre></td></tr></table></figure>
+
+<h2 id="6-read-读取控制台输入"><a href="#6-read-读取控制台输入" class="headerlink" title="6. read 读取控制台输入"></a>6. read 读取控制台输入</h2><p>相当于 Java 的 Scanner。</p>
+<ul>
+<li><strong>基本语法</strong></li>
+</ul>
+<p><code> read (选项) (参数)</code></p>
+<p>选项：</p>
+<p>-p：指定读取值时的提示信息。</p>
+<p>-t：指定读取值时的等待时间，单位为秒，如果没有在指定时间内输入，就不再等待了。</p>
+<p>参数：指定读取值时的变量名。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">vim testRead.sh</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">案例1：读取控制台输入的一个NUM1值</span></span><br><span class="line">read -p &quot;请输入一个数 NUM1=&quot; NUM1</span><br><span class="line">echo &quot;你输入的 NUM1=$NUM1&quot;</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">案例2：读取控制台输入的一个NUM2值，需要在10s内输入</span></span><br><span class="line">read -t 10 -p &quot;请在10s内输入一个数 NUM2=&quot;  NUM2</span><br><span class="line">echo &quot;你输入的 NUM2=$NUM2&quot;</span><br></pre></td></tr></table></figure>
+
+<h2 id="7-函数"><a href="#7-函数" class="headerlink" title="7. 函数"></a>7. 函数</h2><p>Shell 编程和其它语言一样也有函数，可以分为系统函数和自定义函数。</p>
+<h3 id="7-1-系统函数"><a href="#7-1-系统函数" class="headerlink" title="7.1 系统函数"></a>7.1 系统函数</h3><p>这里举两个系统函数为例：</p>
+<ol>
+<li>basename 函数：返回完整路径最后一个/后的部分，即获取文件名。</li>
+</ol>
+<p><code>basename [pathname] [suffix]</code></p>
+<p>如果指定了后缀 suffix，那么函数会把 pathname 中的 suffix 去掉。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">basename /home/aaa/test.txt</span><br><span class="line"><span class="meta"># </span><span class="language-bash">返回 test.txt</span></span><br><span class="line"></span><br><span class="line">basename /home/aaa/test.txt .txt</span><br><span class="line"><span class="meta"># </span><span class="language-bash">返回 <span class="built_in">test</span></span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>dirname 函数：返回完整路径最后一个/前的部分，即获取决定路径</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">dirname /home/aaa/test.txt</span><br><span class="line"><span class="meta"># </span><span class="language-bash">返回 /home/aaa</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="7-2-自定义函数"><a href="#7-2-自定义函数" class="headerlink" title="7.2 自定义函数"></a>7.2 自定义函数</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta"># </span><span class="language-bash">基本语法</span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">定义函数</span></span><br><span class="line">function funname()</span><br><span class="line">&#123;</span><br><span class="line">	Action;</span><br><span class="line">	[return int;]</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta"># </span><span class="language-bash">调用函数 直接写函数名</span></span><br><span class="line">funname [value]</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">案例：用一个函数 getSum 计算两个控制台输入的参数的和</span></span><br><span class="line">vim testFun.sh</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line">function getSum()&#123;</span><br><span class="line">	SUM=$[$n1+$n2]</span><br><span class="line">	echo &quot;sum=$SUM&quot;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">read -p &quot;n1=&quot; n1</span><br><span class="line">read -p &quot;n2=&quot; n2</span><br><span class="line"></span><br><span class="line">getSum $n1 $n2</span><br></pre></td></tr></table></figure>
+
+<h2 id="8-Shell-编程综合案例"><a href="#8-Shell-编程综合案例" class="headerlink" title="8. Shell 编程综合案例"></a>8. Shell 编程综合案例</h2><p>需求：</p>
+<ol>
+<li>每天凌晨 2:30 备份数据库 yeDB 到 /data/backup/db</li>
+<li>备份开始和结束时给出相应提示信息</li>
+<li>备份后的文件要求以备份时间为文件名，并打包成 .tar.gz，如 2022-08-01_230201.tar.gz</li>
+<li>在备份的同时，检查是否有 10 天前备份的数据库文件，如果有就将其删除</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">cd /usr/bin</span><br><span class="line">vim mysql_db_backup.sh</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">备份目录</span></span><br><span class="line">BACKUP=/data/backup/db</span><br><span class="line"><span class="meta"># </span><span class="language-bash">当前时间</span></span><br><span class="line">DATETIME=$(date +%Y-%m-%d_%H%M%S)</span><br><span class="line"><span class="meta"># </span><span class="language-bash">数据库的地址</span></span><br><span class="line">HOST=localhost</span><br><span class="line"><span class="meta"># </span><span class="language-bash">数据库用户名</span></span><br><span class="line">DB_USER=root</span><br><span class="line"><span class="meta"># </span><span class="language-bash">数据库密码</span></span><br><span class="line">DB_PW=root</span><br><span class="line"><span class="meta"># </span><span class="language-bash">备份的数据库名</span></span><br><span class="line">DATABASE=yeDB</span><br><span class="line"></span><br><span class="line">echo &quot;db $&#123;DATABASE&#125; backup started&quot;</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">如果备份目录不存在，则创建目录</span></span><br><span class="line">[ ! -d &quot;$&#123;BACKUP&#125;/$&#123;DATETIME&#125;&quot; ] &amp;&amp; mkdir -p &quot;$&#123;BACKUP&#125;/$&#123;DATETIME&#125;&quot;</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">备份数据库</span></span><br><span class="line">mysqldump -u$&#123;DB_USER&#125; -p$&#123;DB_PW&#125; --host=$&#123;HOST&#125; -q -R --databases $&#123;DATABASE&#125; | gzip &gt; $&#123;BACKUP&#125;/$&#123;DATETIME&#125;/$DATETIME.sql.gz</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">进入备份目录，把年月日时分秒的文件夹和里面压缩好的sql.gz全部打包成tar.gz</span></span><br><span class="line">cd $&#123;BACKUP&#125;</span><br><span class="line">tar -zcvf $DATETIME.tar.gz $&#123;DATETIME&#125;</span><br><span class="line"><span class="meta"># </span><span class="language-bash">打包后删除原来的文件夹</span></span><br><span class="line">rm -rf $&#123;BACKUP&#125;/$&#123;DATETIME&#125;</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">删除10天前的备份文件</span></span><br><span class="line">find $&#123;BACKUP&#125; -atime +10 -name &quot;*.tar.gz&quot; -exec rm -rf &#123;&#125; \;</span><br><span class="line"></span><br><span class="line">echo &quot;db $&#123;DATABASE&#125; backup completed&quot;</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">crond 定时任务</span></span><br><span class="line">crontab -e</span><br><span class="line">30 2 * * * /usr/sbin/mysql_db_backup.sh</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"># </span><span class="language-bash">查看定时任务</span></span><br><span class="line">crontab -l</span><br></pre></td></tr></table></figure>
+
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2022/07/24/Linux-%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+                Ye Yang | 
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://hexo.io/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+  </body>
+</html>
